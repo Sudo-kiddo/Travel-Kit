@@ -2,14 +2,20 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <title>TravelKit - 2026 Summer Thai Trip</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
-        body { font-family: 'Noto Sans TC', system-ui, sans-serif; -webkit-user-select: none; background-color: #f8fafc; }
+        body { 
+            font-family: 'Noto Sans TC', system-ui, sans-serif; 
+            -webkit-user-select: none; 
+            background-color: #f8fafc; 
+            min-height: 100dvh; /* 動態適配手機高度 */
+            overflow-x: hidden;
+        }
         
         .bg-gradient-rainbow { 
             background: linear-gradient(120deg, #22d3ee, #818cf8, #f472b6, #fb923c, #facc15, #4ade80);
@@ -19,173 +25,175 @@
         @keyframes rainbowAnimation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         .card { box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.05); border: 1px solid rgba(0, 0, 0, 0.04); }
-        .page { display: none; }
-        .page.active { display: block; }
+        .page { display: none; width: 100%; }
+        .page.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
         .nav-item { transition: all 0.2s; cursor: pointer; color: #94a3b8; }
         .nav-item.active { color: #f472b6; font-weight: 900; } 
         .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        .date-chip { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); flex-shrink: 0; width: 72px; height: 80px; border-radius: 1.5rem; }
+        .date-chip { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); flex-shrink: 0; width: 68px; height: 76px; border-radius: 1.25rem; }
         .date-chip.active { background-color: #6366f1; color: white; transform: translateY(-5px); box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.5); } 
         
-        .itinerary-container { position: relative; padding-left: 20px; min-height: 200px; }
+        .itinerary-container { position: relative; padding-left: 18px; min-height: 200px; }
         .itinerary-line { position: absolute; left: 6px; top: 20px; bottom: 20px; width: 3px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
         .itinerary-line::after { content: ""; position: absolute; top: -100px; left: 0; width: 100%; height: 100px; background: linear-gradient(to bottom, transparent, #6366f1, transparent); animation: flowLine 3s infinite linear; }
         @keyframes flowLine { 0% { top: -100px; } 100% { top: 100%; } }
 
-        .itin-card { position: relative; background: white; border-radius: 2.2rem; padding: 1.5rem; margin-bottom: 1.5rem; transition: all 0.3s ease; }
-        .itin-card::before { content: ""; position: absolute; left: -20px; top: 30px; width: 12px; height: 12px; background: white; border: 3px solid #6366f1; border-radius: 50%; z-index: 10; }
+        .itin-card { position: relative; background: white; border-radius: 2rem; padding: 1.25rem; margin-bottom: 1.25rem; transition: all 0.3s ease; width: 100%; }
+        .itin-card::before { content: ""; position: absolute; left: -19px; top: 28px; width: 10px; height: 10px; background: white; border: 2.5px solid #6366f1; border-radius: 50%; z-index: 10; }
         .is-pre-trip .itin-card::before { display: none; }
         .is-pre-trip .itinerary-line { display: none; }
         .is-pre-trip .itinerary-container { padding-left: 0; }
 
         .completed-text { text-decoration: line-through; opacity: 0.5; }
-        .time-bubble { background: #6366f1; color: white; font-weight: 900; font-style: italic; padding: 4px 12px; border-radius: 10px; font-size: 11px; }
+        .time-bubble { background: #6366f1; color: white; font-weight: 900; font-style: italic; padding: 3px 10px; border-radius: 8px; font-size: 10px; }
 
-        .tick-box { width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid #e2e8f0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+        .tick-box { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
         .tick-box.checked { background: #10b981; border-color: #10b981; }
         
-        * { -webkit-tap-highlight-color: transparent; }
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
     </style>
 </head>
-<body class="pb-32">
+<body class="pb-32 overflow-x-hidden">
 
-    <div class="bg-gradient-rainbow text-white sticky top-0 z-50 shadow-lg">
-        <div class="max-w-2xl mx-auto px-6 py-5 flex items-center justify-between">
+    <div class="bg-gradient-rainbow text-white sticky top-0 z-50 shadow-lg w-full">
+        <div class="max-w-2xl mx-auto px-5 py-4 flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-black italic tracking-tighter text-white">2026 Summer Thai Trip</h1>
-                <p class="text-[10px] tracking-[0.2em] opacity-90 uppercase font-bold text-white">24/6 – 30/6 • 泰國之行</p>
+                <h1 class="text-xl font-black italic tracking-tighter text-white">2026 Summer Thai Trip</h1>
+                <p class="text-[9px] tracking-[0.2em] opacity-90 uppercase font-bold text-white">24/6 – 30/6 • 泰國之行</p>
             </div>
-            <button onclick="window.showUpdates()" class="bg-white/20 backdrop-blur-md w-11 h-11 rounded-full flex items-center justify-center border border-white/30 active:scale-90">
-                <i class="fa-solid fa-bell text-sm text-white"></i>
+            <button onclick="window.showUpdates()" class="bg-white/20 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center border border-white/30 active:scale-90">
+                <i class="fa-solid fa-bell text-xs text-white"></i>
             </button>
         </div>
     </div>
 
-    <div class="max-w-2xl mx-auto px-4 pt-6">
+    <div class="max-w-2xl mx-auto px-4 pt-6 w-full">
         
         <div id="page-home" class="page active">
-            <div class="bg-white rounded-[2.5rem] p-10 card text-center border-t-4 border-t-indigo-400">
-                <div class="text-6xl mb-6">🏝️</div>
-                <h2 class="text-2xl font-black italic text-gray-800">同陽光玩遊戲！</h2>
-                <div class="grid grid-cols-1 gap-4 mt-12 mb-16">
-                    <button onclick="window.quickAddExpense()" class="w-full bg-emerald-500 text-white p-7 rounded-[2.2rem] flex items-center justify-between shadow-lg shadow-emerald-100">
-                        <div class="flex items-center gap-4"><div class="bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center"><i class="fa-solid fa-receipt text-xl"></i></div><span class="font-black italic uppercase">新增開支項目</span></div>
-                        <i class="fa-solid fa-chevron-right opacity-50"></i>
+            <div class="bg-white rounded-[2rem] p-8 card text-center border-t-4 border-t-indigo-400">
+                <div class="text-5xl mb-4">🏝️</div>
+                <h2 class="text-xl font-black italic text-gray-800">同陽光玩遊戲！</h2>
+                <div class="grid grid-cols-1 gap-4 mt-10 mb-12">
+                    <button onclick="window.quickAddExpense()" class="w-full bg-emerald-500 text-white p-6 rounded-[1.8rem] flex items-center justify-between shadow-lg shadow-emerald-100">
+                        <div class="flex items-center gap-3"><div class="bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center"><i class="fa-solid fa-receipt text-lg"></i></div><span class="font-black italic uppercase text-sm">新增開支項目</span></div>
+                        <i class="fa-solid fa-chevron-right opacity-50 text-xs"></i>
                     </button>
-                    <button onclick="window.quickAddPlan()" class="w-full bg-indigo-500 text-white p-7 rounded-[2.2rem] flex items-center justify-between shadow-lg shadow-indigo-100">
-                        <div class="flex items-center gap-4"><div class="bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center"><i class="fa-solid fa-map-pin text-xl"></i></div><span class="font-black italic uppercase">更新行程規劃</span></div>
-                        <i class="fa-solid fa-chevron-right opacity-50"></i>
+                    <button onclick="window.quickAddPlan()" class="w-full bg-indigo-500 text-white p-6 rounded-[1.8rem] flex items-center justify-between shadow-lg shadow-indigo-100">
+                        <div class="flex items-center gap-3"><div class="bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center"><i class="fa-solid fa-map-pin text-lg"></i></div><span class="font-black italic uppercase text-sm">更新行程規劃</span></div>
+                        <i class="fa-solid fa-chevron-right opacity-50 text-xs"></i>
                     </button>
                 </div>
-                <div class="mt-10 opacity-20 hover:opacity-100 transition-opacity">
-                    <button onclick="window.factoryReset()" class="text-[10px] font-black text-slate-400 uppercase tracking-widest border border-slate-200 px-4 py-2 rounded-full">重設系統!</button>
+                <div class="mt-6 opacity-20">
+                    <button onclick="window.factoryReset()" class="text-[9px] font-black text-slate-400 uppercase tracking-widest border border-slate-200 px-3 py-2 rounded-full">Reset System</button>
                 </div>
             </div>
         </div>
 
         <div id="page-itinerary" class="page">
-            <div class="flex gap-3 overflow-x-auto pb-6 no-scrollbar" id="calendar-strip"></div>
-            <div class="flex justify-between items-center mb-8 px-2">
-                <h2 class="text-2xl font-black italic text-gray-800" id="current-view-date">Pre-trip 備忘</h2>
-                <button onclick="window.showAddItineraryModal()" class="bg-indigo-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-plus"></i></button>
+            <div class="flex gap-2 overflow-x-auto pb-5 no-scrollbar" id="calendar-strip"></div>
+            <div class="flex justify-between items-center mb-6 px-1">
+                <h2 class="text-xl font-black italic text-gray-800" id="current-view-date">Pre-trip 備忘</h2>
+                <button onclick="window.showAddItineraryModal()" class="bg-indigo-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-plus"></i></button>
             </div>
             <div class="itinerary-container" id="itin-wrapper">
                 <div class="itinerary-line" id="timeline-line"></div>
-                <div id="itinerary-list" class="space-y-4"></div>
+                <div id="itinerary-list" class="space-y-3"></div>
             </div>
         </div>
 
         <div id="page-expenses" class="page">
-            <div class="flex justify-between items-center mb-4 px-2">
-                <h2 class="text-2xl font-black italic">開支結算</h2>
+            <div class="flex justify-between items-center mb-4 px-1">
+                <h2 class="text-xl font-black italic">開支結算</h2>
                 <div class="flex gap-2">
-                    <button onclick="window.showPaybackModal()" class="bg-indigo-100 text-indigo-600 px-4 py-2 rounded-2xl text-[10px] font-black italic">還錢紀錄</button>
-                    <button onclick="window.showAddExpenseModal()" class="bg-emerald-500 text-white px-4 py-2 rounded-2xl text-[10px] font-black italic">記多一筆</button>
+                    <button onclick="window.showPaybackModal()" class="bg-indigo-100 text-indigo-600 px-3 py-2 rounded-xl text-[9px] font-black italic">還錢</button>
+                    <button onclick="window.showAddExpenseModal()" class="bg-emerald-500 text-white px-3 py-2 rounded-xl text-[9px] font-black italic">新增</button>
                 </div>
             </div>
-            <div class="bg-slate-900 text-white rounded-[2.5rem] p-8 mb-6 shadow-2xl italic">
+            <div class="bg-slate-900 text-white rounded-[2rem] p-6 mb-5 shadow-2xl italic">
                 <div class="flex justify-between items-end">
-                    <div><span class="text-slate-400 text-[10px] font-black tracking-widest">總計 THB</span><div id="total-spent-thb" class="text-4xl font-black mt-1">฿0</div></div>
-                    <div class="text-right"><span class="text-slate-400 text-[10px] font-black tracking-widest">總計 HKD</span><div id="total-spent-hkd" class="text-xl font-black mt-1">$0</div></div>
+                    <div><span class="text-slate-400 text-[9px] font-black tracking-widest">總計 THB</span><div id="total-spent-thb" class="text-3xl font-black mt-1">฿0</div></div>
+                    <div class="text-right"><span class="text-slate-400 text-[9px] font-black tracking-widest">總計 HKD</span><div id="total-spent-hkd" class="text-lg font-black mt-1">$0</div></div>
                 </div>
             </div>
-            <div id="expense-list" class="space-y-4 mb-10"></div>
-            <div id="settlement-list" class="bg-white rounded-[2rem] p-6 card space-y-4 border-t-4 border-t-emerald-400"></div>
+            <div id="expense-list" class="space-y-3 mb-8"></div>
+            <div id="settlement-list" class="bg-white rounded-[1.8rem] p-5 card space-y-3 border-t-4 border-t-emerald-400"></div>
         </div>
 
         <div id="page-map" class="page">
             <div class="flex gap-2 mb-4">
-                <input id="map-search" type="text" placeholder="想去邊度？" class="flex-1 px-6 py-4 rounded-2xl border-none shadow-md font-bold outline-none focus:ring-2 ring-indigo-400">
-                <button onclick="window.searchAndShowDirections()" class="bg-slate-900 text-white px-6 rounded-2xl"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <input id="map-search" type="text" placeholder="想去邊度？" class="flex-1 px-5 py-3.5 rounded-xl border-none shadow-md font-bold outline-none focus:ring-2 ring-indigo-400 text-sm">
+                <button onclick="window.searchAndShowDirections()" class="bg-slate-900 text-white px-5 rounded-xl"><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
-            <div id="map-container" class="h-[450px] bg-white rounded-[2.5rem] card overflow-hidden flex items-center justify-center text-slate-300 italic">
+            <div id="map-container" class="h-[60vh] bg-white rounded-[2rem] card overflow-hidden flex items-center justify-center text-slate-300 italic text-sm p-2">
                 <p>請輸入目的地搜尋地圖</p>
             </div>
         </div>
         
         <div id="page-documents" class="page">
-            <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-black italic">共享文件</h2><button onclick="window.triggerUpload()" class="bg-slate-900 text-white px-5 py-2 rounded-2xl text-[10px] font-black italic">上傳文件</button></div>
+            <div class="flex justify-between items-center mb-5"><h2 class="text-xl font-black italic">共享文件</h2><button onclick="window.triggerUpload()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-[9px] font-black italic">上傳</button></div>
             <div id="documents-list" class="space-y-3"></div>
             <input type="file" id="file-input" class="hidden" onchange="window.handleFileSelect(event)">
         </div>
     </div>
 
-    <div class="fixed bottom-6 left-4 right-4 bg-white/95 backdrop-blur-xl border border-white/20 rounded-[2.5rem] max-w-2xl mx-auto z-50 shadow-2xl">
-        <div class="grid grid-cols-5 text-center py-5">
-            <div onclick="window.navigateTo('home')" class="nav-item active flex flex-col items-center"><i class="fa-solid fa-house text-lg"></i><span class="text-[9px] mt-1 font-black uppercase">Home</span></div>
-            <div onclick="window.navigateTo('itinerary')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-route text-lg"></i><span class="text-[9px] mt-1 font-black uppercase">Plan</span></div>
-            <div onclick="window.navigateTo('expenses')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-receipt text-lg"></i><span class="text-[9px] mt-1 font-black uppercase">Spend</span></div>
-            <div onclick="window.navigateTo('map')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-map text-lg"></i><span class="text-[9px] mt-1 font-black uppercase">Map</span></div>
-            <div onclick="window.navigateTo('documents')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-folder text-lg"></i><span class="text-[9px] mt-1 font-black uppercase">Docs</span></div>
+    <div class="fixed bottom-6 left-4 right-4 bg-white/95 backdrop-blur-xl border border-white/20 rounded-[2.2rem] max-w-2xl mx-auto z-50 shadow-2xl">
+        <div class="grid grid-cols-5 text-center py-4">
+            <div onclick="window.navigateTo('home')" class="nav-item active flex flex-col items-center"><i class="fa-solid fa-house text-base"></i><span class="text-[8px] mt-1 font-black uppercase">Home</span></div>
+            <div onclick="window.navigateTo('itinerary')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-route text-base"></i><span class="text-[8px] mt-1 font-black uppercase">Plan</span></div>
+            <div onclick="window.navigateTo('expenses')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-receipt text-base"></i><span class="text-[8px] mt-1 font-black uppercase">Spend</span></div>
+            <div onclick="window.navigateTo('map')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-map text-base"></i><span class="text-[8px] mt-1 font-black uppercase">Map</span></div>
+            <div onclick="window.navigateTo('documents')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-folder text-base"></i><span class="text-[8px] mt-1 font-black uppercase">Docs</span></div>
         </div>
     </div>
 
     <div id="modal-updates" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] px-6">
-        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8">
-            <h3 class="text-xl font-black mb-4 italic">最新動態 🔔</h3>
-            <div class="space-y-3 mb-8">
-                <div class="p-4 bg-slate-50 rounded-xl text-xs font-bold italic border-l-4 border-indigo-500">地圖功能、動態時間線已全面同步。</div>
-                <div class="p-4 bg-slate-50 rounded-xl text-xs font-bold italic border-l-4 border-indigo-500">Pre-trip 備忘已支持「自動移至底部」。</div>
+        <div class="bg-white w-full max-w-md rounded-[2rem] p-7">
+            <h3 class="text-lg font-black mb-4 italic">最新動態 🔔</h3>
+            <div class="space-y-3 mb-6">
+                <div class="p-3 bg-slate-50 rounded-xl text-[10px] font-bold italic border-l-4 border-indigo-500 uppercase">雲端同步成功：數據自動即時刷新。</div>
+                <div class="p-3 bg-slate-50 rounded-xl text-[10px] font-bold italic border-l-4 border-indigo-500 uppercase">移動端適配：UI 已完美契合手機瀏覽器。</div>
             </div>
-            <button onclick="window.hideModals()" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-black italic">知道了</button>
+            <button onclick="window.hideModals()" class="w-full py-3.5 bg-gray-900 text-white rounded-xl font-black italic text-sm">知道了</button>
         </div>
     </div>
 
     <div id="modal-itinerary" class="hidden fixed inset-0 bg-black/80 flex items-end z-[9999]">
-        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2.5rem] p-10 overflow-y-auto max-h-[90vh]">
-            <h3 id="modal-itinerary-title" class="text-xl font-black italic mb-6">更新行程事項</h3>
-            <select id="act-date" onchange="window.toggleTimeFields()" class="w-full mb-4 p-5 rounded-2xl bg-slate-100 font-bold border-none outline-none">
+        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2rem] p-8 overflow-y-auto max-h-[92vh]">
+            <h3 id="modal-itinerary-title" class="text-lg font-black italic mb-5">更新行程事項</h3>
+            <select id="act-date" onchange="window.toggleTimeFields()" class="w-full mb-3 p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm">
                 <option value="Pre">Pre-trip 備忘</option><option value="24">24/6</option><option value="25">25/6</option><option value="26">26/6</option><option value="27">27/6</option><option value="28">28/6</option><option value="29">29/6</option><option value="30">30/6</option>
             </select>
-            <div id="time-selector" class="flex gap-2 items-center mb-4">
-                <select id="act-hour" class="flex-1 p-5 rounded-2xl bg-slate-100 font-black text-center border-none outline-none"></select>
+            <div id="time-selector" class="flex gap-2 items-center mb-3">
+                <select id="act-hour" class="flex-1 p-4 rounded-xl bg-slate-100 font-black text-center border-none outline-none text-sm"></select>
                 <span class="font-black text-indigo-500">:</span>
-                <select id="act-min" class="flex-1 p-5 rounded-2xl bg-slate-100 font-black text-center border-none outline-none"></select>
+                <select id="act-min" class="flex-1 p-4 rounded-xl bg-slate-100 font-black text-center border-none outline-none text-sm"></select>
             </div>
-            <input id="act-title" type="text" placeholder="事項名稱" class="w-full mb-4 p-5 rounded-2xl bg-slate-100 font-bold border-none outline-none">
-            <textarea id="act-remark" placeholder="備註..." class="w-full p-5 rounded-2xl bg-slate-100 h-32 font-bold border-none outline-none mb-8"></textarea>
-            <div class="flex gap-4">
-                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic">返回</button>
-                <button id="delete-btn" onclick="window.deleteItinerary()" class="hidden flex-1 py-4 text-rose-500 font-bold italic">刪除</button>
-                <button onclick="window.saveItinerary()" class="flex-[2] py-4 bg-indigo-500 text-white rounded-2xl font-black italic shadow-lg">儲存項目</button>
+            <input id="act-title" type="text" placeholder="事項名稱" class="w-full mb-3 p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm">
+            <textarea id="act-remark" placeholder="備註..." class="w-full p-4 rounded-xl bg-slate-100 h-24 font-bold border-none outline-none mb-6 text-sm"></textarea>
+            <div class="flex gap-3">
+                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic text-sm">返回</button>
+                <button id="delete-btn" onclick="window.deleteItinerary()" class="hidden flex-1 py-4 text-rose-500 font-bold italic text-sm">刪除</button>
+                <button onclick="window.saveItinerary()" class="flex-[2] py-4 bg-indigo-500 text-white rounded-xl font-black italic shadow-lg text-sm">儲存</button>
             </div>
         </div>
     </div>
 
     <div id="modal-expense" class="hidden fixed inset-0 bg-black/80 flex items-end z-[9999]">
-        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2.5rem] p-8">
-            <h3 class="text-xl font-black mb-6 italic text-emerald-500">新增開支</h3>
-            <input id="exp-desc" type="text" placeholder="名稱" class="w-full p-4 rounded-2xl bg-slate-100 mb-4 font-bold border-none outline-none">
-            <div class="grid grid-cols-2 gap-4 mb-4">
-                <input id="exp-amount" type="number" placeholder="金額" class="p-4 rounded-2xl bg-slate-100 font-bold border-none outline-none">
-                <select id="exp-currency" class="p-4 rounded-2xl bg-slate-100 font-bold border-none outline-none"><option value="THB">฿ THB</option><option value="HKD">$ HKD</option></select>
+        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2rem] p-8">
+            <h3 class="text-lg font-black mb-5 italic text-emerald-500 uppercase">新增開支</h3>
+            <input id="exp-desc" type="text" placeholder="項目名稱" class="w-full p-4 rounded-xl bg-slate-100 mb-3 font-bold border-none outline-none text-sm">
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <input id="exp-amount" type="number" placeholder="金額" class="p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm">
+                <select id="exp-currency" class="p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm"><option value="THB">฿ THB</option><option value="HKD">$ HKD</option></select>
             </div>
-            <select id="exp-paidby" class="w-full p-4 rounded-2xl bg-slate-100 mb-6 font-bold border-none outline-none"></select>
-            <div id="split-members" class="flex flex-wrap gap-2 mb-8"></div>
-            <div class="flex gap-4">
-                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic">返回</button>
-                <button onclick="window.saveExpense()" class="flex-[2] py-4 bg-emerald-500 text-white rounded-2xl font-black italic shadow-lg">確認記帳</button>
+            <select id="exp-paidby" class="w-full p-4 rounded-xl bg-slate-100 mb-5 font-bold border-none outline-none text-sm"></select>
+            <div id="split-members" class="flex flex-wrap gap-2 mb-6"></div>
+            <div class="flex gap-3">
+                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic text-sm">返回</button>
+                <button onclick="window.saveExpense()" class="flex-[2] py-4 bg-emerald-500 text-white rounded-xl font-black italic shadow-lg text-sm">確認記帳</button>
             </div>
         </div>
     </div>
@@ -203,6 +211,7 @@
         
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // 實時監聽：一旦數據庫有變動，立即重新抓取
         client.channel('realtime_sync')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'itinerary' }, () => fetchData())
             .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => fetchData())
@@ -234,8 +243,8 @@
             const dates = ["Pre", "24", "25", "26", "27", "28", "29", "30"];
             document.getElementById('calendar-strip').innerHTML = dates.map(d => `
                 <div onclick="window.filterDate('${d}')" id="date-${d}" class="date-chip flex flex-col items-center justify-center bg-white card cursor-pointer ${d === selectedDate ? 'active' : ''}">
-                    <span class="text-[9px] font-black opacity-40 uppercase text-center">${d === 'Pre' ? 'List' : 'JUNE'}</span>
-                    <span class="text-xl font-black italic">${d === 'Pre' ? '備忘' : d}</span>
+                    <span class="text-[8px] font-black opacity-40 uppercase text-center">${d === 'Pre' ? 'List' : 'JUNE'}</span>
+                    <span class="text-lg font-black italic">${d === 'Pre' ? '備忘' : d}</span>
                 </div>`).join('');
         }
 
@@ -251,6 +260,7 @@
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             const idx = ['home','itinerary','expenses','map','documents'].indexOf(page);
             if(idx >= 0) document.querySelectorAll('.nav-item')[idx].classList.add('active');
+            window.scrollTo(0,0);
         };
 
         window.filterDate = (d) => {
@@ -290,8 +300,8 @@
                                 </div>
                                 ${!isPre && item.time ? `<span class="time-bubble">${item.time}</span>` : ''}
                             </div>
-                            <div class="font-black text-xl text-slate-800 leading-tight ${item.checked ? 'completed-text' : ''}">${item.title}</div>
-                            ${item.remark ? `<div class="bg-slate-50 p-4 rounded-2xl text-[11px] font-bold text-slate-500 italic mt-3">${item.remark}</div>` : ''}
+                            <div class="font-black text-base text-slate-800 leading-tight ${item.checked ? 'completed-text' : ''}">${item.title}</div>
+                            ${item.remark ? `<div class="bg-slate-50 p-3 rounded-xl text-[10px] font-bold text-slate-500 italic mt-2">${item.remark}</div>` : ''}
                         </div>
                     </div>
                 </div>`).join('');
@@ -301,7 +311,7 @@
             const item = demoItinerary.find(i => i.id === id);
             if (!item) return;
             const { error } = await client.from('itinerary').update({ checked: !item.checked }).eq('id', id);
-            if (error) alert("操作失敗");
+            if (!error) fetchData(); // 立即本地重新抓取
         };
 
         window.showAddItineraryModal = () => {
@@ -338,13 +348,13 @@
                 checked: editingId ? (demoItinerary.find(i => i.id === editingId).checked || false) : false 
             };
             const { error } = await client.from('itinerary').upsert(data);
-            if (error) alert("儲存失敗"); else window.hideModals();
+            if (!error) { window.hideModals(); fetchData(); }
         };
 
         window.deleteItinerary = async () => {
             if(confirm("確定刪除？")) {
                 const { error } = await client.from('itinerary').delete().eq('id', editingId);
-                if (!error) window.hideModals();
+                if (!error) { window.hideModals(); fetchData(); }
             }
         };
 
@@ -359,7 +369,7 @@
             document.getElementById('exp-desc').value = "";
             document.getElementById('exp-amount').value = "";
             document.getElementById('exp-paidby').innerHTML = groupMembers.map(m => `<option value="${m}">${m}</option>`).join('');
-            document.getElementById('split-members').innerHTML = groupMembers.map(m => `<label class="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-xl text-[10px] font-bold"><input type="checkbox" value="${m}" checked> ${m}</label>`).join('');
+            document.getElementById('split-members').innerHTML = groupMembers.map(m => `<label class="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-xl text-[9px] font-bold"><input type="checkbox" value="${m}" checked> ${m}</label>`).join('');
             document.getElementById('modal-expense').classList.remove('hidden');
         };
 
@@ -375,7 +385,7 @@
                 split
             };
             const { error } = await client.from('expenses').insert(newExpense);
-            if (!error) window.hideModals();
+            if (!error) { window.hideModals(); fetchData(); }
         };
 
         function renderExpenses() {
@@ -388,7 +398,7 @@
                 const share = item.amount / item.split.length;
                 bal[item.paid_by][item.currency] += item.amount;
                 item.split.forEach(m => bal[m][item.currency] -= share);
-                return `<div class="bg-white p-5 rounded-3xl card flex justify-between items-center"><div><div class="font-black text-slate-800">${item.desc}</div><div class="text-[9px] font-bold text-slate-400 italic">${item.paid_by} Paid</div></div><div class="text-xl font-black italic">${item.currency==='THB'?'฿':'$'}${item.amount.toLocaleString()}</div></div>`;
+                return `<div class="bg-white p-4 rounded-[1.5rem] card flex justify-between items-center"><div><div class="font-black text-slate-800 text-sm">${item.desc}</div><div class="text-[8px] font-bold text-slate-400 italic uppercase">${item.paid_by} Paid</div></div><div class="text-base font-black italic">${item.currency==='THB'?'฿':'$'}${item.amount.toLocaleString()}</div></div>`;
             }).join('');
             
             document.getElementById('total-spent-thb').textContent = `฿${thbTotal.toLocaleString()}`;
@@ -396,13 +406,13 @@
             
             document.getElementById('settlement-list').innerHTML = groupMembers.map(m => {
                 const t = bal[m].THB; const h = bal[m].HKD;
-                return `<div class="flex justify-between items-start border-b border-slate-50 pb-3 last:border-0"><span class="font-bold text-gray-700 text-sm italic">${m}</span><div class="text-right"><div class="font-black text-xs ${t>=0?'text-emerald-500':'text-rose-400'}">${t.toFixed(0)}</div><div class="font-black text-[10px] ${h>=0?'text-emerald-600':'text-rose-600'}">${h.toFixed(0)}</div></div></div>`;
+                return `<div class="flex justify-between items-start border-b border-slate-50 pb-3 last:border-0"><span class="font-bold text-gray-700 text-xs italic">${m}</span><div class="text-right"><div class="font-black text-[10px] ${t>=0?'text-emerald-500':'text-rose-400'}">${t.toFixed(0)}</div><div class="font-black text-[9px] ${h>=0?'text-emerald-600':'text-rose-600'}">${h.toFixed(0)}</div></div></div>`;
             }).join('');
         }
 
         window.searchAndShowDirections = () => {
             const q = document.getElementById('map-search').value; if(!q) return;
-            document.getElementById('map-container').innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0; border-radius:2.5rem; min-height:450px;" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed"></iframe>`;
+            document.getElementById('map-container').innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0; border-radius:1.5rem;" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed"></iframe>`;
         };
 
         window.triggerUpload = () => document.getElementById('file-input').click();
@@ -410,29 +420,26 @@
             const file = e.target.files[0];
             if(file) {
                 const newDoc = { id: Date.now(), name: file.name, date: new Date().toLocaleDateString() };
-                await client.from('documents').insert(newDoc);
+                const { error } = await client.from('documents').insert(newDoc);
+                if(!error) fetchData();
             }
         };
 
         function renderDocs() {
             document.getElementById('documents-list').innerHTML = demoDocs.map(doc => `
-                <div class="bg-white p-5 rounded-3xl card flex items-center gap-4">
-                    <div class="bg-indigo-50 w-10 h-10 rounded-xl flex items-center justify-center text-indigo-500"><i class="fa-solid fa-file"></i></div>
-                    <div><div class="text-sm font-black text-gray-800">${doc.name}</div><div class="text-[9px] font-bold text-slate-400 italic">${doc.date}</div></div>
+                <div class="bg-white p-4 rounded-[1.5rem] card flex items-center gap-3">
+                    <div class="bg-indigo-50 w-9 h-9 rounded-lg flex items-center justify-center text-indigo-500 text-xs"><i class="fa-solid fa-file"></i></div>
+                    <div><div class="text-xs font-black text-gray-800">${doc.name}</div><div class="text-[8px] font-bold text-slate-400 italic">${doc.date}</div></div>
                 </div>`).join('');
         }
 
         window.factoryReset = async () => {
-            if(confirm("⚠️ 警告：這將會清除所有雲端行程與開支數據，確定要執行嗎？")) {
-                if(confirm("最後確認：此操作無法復原，確定重設系統？")) {
-                    const { error: itError } = await client.from('itinerary').delete().neq('id', 0);
-                    const { error: exError } = await client.from('expenses').delete().neq('id', 0);
-                    if(!itError && !exError) {
-                        alert("系統已成功重設。");
-                        fetchData();
-                    } else {
-                        alert("部分數據重設失敗，請檢查網絡連結。");
-                    }
+            if(confirm("⚠️ 警告：這將會清除所有雲端數據，確定？")) {
+                if(confirm("最後確認：確定重設？")) {
+                    await client.from('itinerary').delete().neq('id', 0);
+                    await client.from('expenses').delete().neq('id', 0);
+                    await client.from('documents').delete().neq('id', 0);
+                    location.reload();
                 }
             }
         };
