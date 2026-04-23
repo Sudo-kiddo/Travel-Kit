@@ -78,6 +78,9 @@
                         <i class="fa-solid fa-chevron-right opacity-50"></i>
                     </button>
                 </div>
+                <div class="mt-10 opacity-20 hover:opacity-100 transition-opacity">
+                    <button onclick="window.factoryReset()" class="text-[10px] font-black text-slate-400 uppercase tracking-widest border border-slate-200 px-4 py-2 rounded-full">Reset System</button>
+                </div>
             </div>
         </div>
 
@@ -180,12 +183,14 @@
             </div>
             <select id="exp-paidby" class="w-full p-4 rounded-2xl bg-slate-100 mb-6 font-bold border-none outline-none"></select>
             <div id="split-members" class="flex flex-wrap gap-2 mb-8"></div>
-            <button onclick="window.saveExpense()" class="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black italic">確認記帳</button>
+            <div class="flex gap-4">
+                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic">返回</button>
+                <button onclick="window.saveExpense()" class="flex-[2] py-4 bg-emerald-500 text-white rounded-2xl font-black italic shadow-lg">確認記帳</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // --- 1. 數據初始化與 Supabase 設定 ---
         const groupMembers = ["Valerie", "Victoria", "Alston", "Steven", "Edward"];
         let demoItinerary = [];
         let demoExpenses = [];
@@ -196,17 +201,14 @@
         const SUPABASE_URL = 'https://tyvvmxmdeaugjaxhqkol.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5dnZteG1kZWF1Z2pheGhxa29sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjI4NTMsImV4cCI6MjA5MjQzODg1M30.WOibTjOXIgd-Zpbc9fXuUo_IAUuFvy2cdFn7ohrTAIQ';
         
-        // 修正：更名避免命名衝突
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 實時監聽
         client.channel('realtime_sync')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'itinerary' }, () => fetchData())
             .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => fetchData())
             .on('postgres_changes', { event: '*', schema: 'public', table: 'documents' }, () => fetchData())
             .subscribe();
 
-        // 核心加載函數
         async function fetchData() {
             const { data: itin } = await client.from('itinerary').select('*');
             const { data: exp } = await client.from('expenses').select('*');
@@ -221,7 +223,6 @@
             renderDocs();
         }
 
-        // --- 2. 頁面初始化 ---
         window.onload = () => {
             initDateBar();
             initTimeSelectors();
@@ -260,7 +261,6 @@
             renderItinerary();
         };
 
-        // --- 3. 行程渲染與邏輯 ---
         function renderItinerary() {
             const container = document.getElementById('itinerary-list');
             const wrapper = document.getElementById('itin-wrapper');
@@ -352,11 +352,12 @@
             document.getElementById('time-selector').style.display = document.getElementById('act-date').value === 'Pre' ? 'none' : 'flex';
         };
 
-        // --- 4. 開支與分賬邏輯 ---
         window.quickAddExpense = () => { window.navigateTo('expenses'); window.showAddExpenseModal(); };
         window.quickAddPlan = () => { window.navigateTo('itinerary'); window.showAddItineraryModal(); };
         
         window.showAddExpenseModal = () => {
+            document.getElementById('exp-desc').value = "";
+            document.getElementById('exp-amount').value = "";
             document.getElementById('exp-paidby').innerHTML = groupMembers.map(m => `<option value="${m}">${m}</option>`).join('');
             document.getElementById('split-members').innerHTML = groupMembers.map(m => `<label class="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-xl text-[10px] font-bold"><input type="checkbox" value="${m}" checked> ${m}</label>`).join('');
             document.getElementById('modal-expense').classList.remove('hidden');
@@ -399,10 +400,9 @@
             }).join('');
         }
 
-        // --- 5. 地圖與文件 ---
         window.searchAndShowDirections = () => {
             const q = document.getElementById('map-search').value; if(!q) return;
-            document.getElementById('map-container').innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0; border-radius:2.5rem;" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed"></iframe>`;
+            document.getElementById('map-container').innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0; border-radius:2.5rem; min-height:450px;" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed"></iframe>`;
         };
 
         window.triggerUpload = () => document.getElementById('file-input').click();
@@ -422,8 +422,23 @@
                 </div>`).join('');
         }
 
+        window.factoryReset = async () => {
+            if(confirm("⚠️ 警告：這將會清除所有雲端行程與開支數據，確定要執行嗎？")) {
+                if(confirm("最後確認：此操作無法復原，確定重設系統？")) {
+                    const { error: itError } = await client.from('itinerary').delete().neq('id', 0);
+                    const { error: exError } = await client.from('expenses').delete().neq('id', 0);
+                    if(!itError && !exError) {
+                        alert("系統已成功重設。");
+                        fetchData();
+                    } else {
+                        alert("部分數據重設失敗，請檢查網絡連結。");
+                    }
+                }
+            }
+        };
+
         window.showUpdates = () => document.getElementById('modal-updates').classList.remove('hidden');
-        window.hideModals = () => document.querySelectorAll('[id^="modal-"]').forEach(m => m.classList.add('hidden'));
+        window.hideModals = () => document.querySelectorAll('[id^=\"modal-\"]').forEach(m => m.classList.add('hidden'));
     </script>
 </body>
 </html>
