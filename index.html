@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>TravelKit - 2026 Summer Thai Trip</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+        body { font-family: 'Noto Sans TC', system-ui, sans-serif; -webkit-user-select: none; background-color: #f8fafc; }
+        
+        .bg-gradient-rainbow { 
+            background: linear-gradient(120deg, #22d3ee, #818cf8, #f472b6, #fb923c, #facc15, #4ade80);
+            background-size: 200% 200%;
+            animation: rainbowAnimation 5s ease infinite;
+        }
+        @keyframes rainbowAnimation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        .card { box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.05); border: 1px solid rgba(0, 0, 0, 0.04); }
+        .page { display: none; }
+        .page.active { display: block; }
+        .nav-item { transition: all 0.2s; cursor: pointer; color: #94a3b8; }
+        .nav-item.active { color: #f472b6; font-weight: 900; } 
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        .date-chip { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); flex-shrink: 0; width: 72px; height: 80px; border-radius: 1.5rem; }
+        .date-chip.active { background-color: #6366f1; color: white; transform: translateY(-5px); box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.5); } 
+        
+        .itinerary-container { position: relative; padding-left: 20px; min-height: 200px; }
+        .itinerary-line { position: absolute; left: 6px; top: 20px; bottom: 20px; width: 3px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
+        .itinerary-line::after { content: ""; position: absolute; top: -100px; left: 0; width: 100%; height: 100px; background: linear-gradient(to bottom, transparent, #6366f1, transparent); animation: flowLine 3s infinite linear; }
+        @keyframes flowLine { 0% { top: -100px; } 100% { top: 100%; } }
+
+        .itin-card { position: relative; background: white; border-radius: 2.2rem; padding: 1.5rem; margin-bottom: 1.5rem; transition: all 0.3s ease; }
+        .itin-card::before { content: ""; position: absolute; left: -20px; top: 30px; width: 12px; height: 12px; background: white; border: 3px solid #6366f1; border-radius: 50%; z-index: 10; }
+        .is-pre-trip .itin-card::before { display: none; }
+        .is-pre-trip .itinerary-line { display: none; }
+        .is-pre-trip .itinerary-container { padding-left: 0; }
+
+        .completed-text { text-decoration: line-through; opacity: 0.5; }
+        .time-bubble { background: #6366f1; color: white; font-weight: 900; font-style: italic; padding: 4px 12px; border-radius: 10px; font-size: 11px; }
+
+        .tick-box { width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid #e2e8f0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+        .tick-box.checked { background: #10b981; border-color: #10b981; }
+        
+        * { -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="pb-32">
+
+    <div class="bg-gradient-rainbow text-white sticky top-0 z-50 shadow-lg">
+        <div class="max-w-2xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-black italic tracking-tighter text-white">2026 Summer Thai Trip</h1>
+                <p class="text-[10px] tracking-[0.2em] opacity-90 uppercase font-bold text-white">24/6 – 30/6 • 泰國之行</p>
+            </div>
+            <button onclick="window.showUpdates()" class="bg-white/20 backdrop-blur-md w-11 h-11 rounded-full flex items-center justify-center border border-white/30 active:scale-90">
+                <i class="fa-solid fa-bell text-sm text-white"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="max-w-2xl mx-auto px-4 pt-6">
+        
+        <div id="page-home" class="page active">
+            <div class="bg-white rounded-[2.5rem] p-10 card text-center border-t-4 border-t-indigo-400">
+                <div class="text-6xl mb-6">🏝️</div>
+                <h2 class="text-2xl font-black italic text-gray-800">同陽光玩遊戲！</h2>
+                <div class="grid grid-cols-1 gap-4 mt-12 mb-16">
+                    <button onclick="window.quickAddExpense()" class="w-full bg-emerald-500 text-white p-7 rounded-[2.2rem] flex items-center justify-between shadow-lg shadow-emerald-100">
+                        <div class="flex items-center gap-4"><div class="bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center"><i class="fa-solid fa-receipt text-xl"></i></div><span class="font-black italic uppercase">新增開支項目</span></div>
+                        <i class="fa-solid fa-chevron-right opacity-50"></i>
+                    </button>
+                    <button onclick="window.quickAddPlan()" class="w-full bg-indigo-500 text-white p-7 rounded-[2.2rem] flex items-center justify-between shadow-lg shadow-indigo-100">
+                        <div class="flex items-center gap-4"><div class="bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center"><i class="fa-solid fa-map-pin text-xl"></i></div><span class="font-black italic uppercase">更新行程規劃</span></div>
+                        <i class="fa-solid fa-chevron-right opacity-50"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-itinerary" class="page">
+            <div class="flex gap-3 overflow-x-auto pb-6 no-scrollbar" id="calendar-strip"></div>
+            <div class="flex justify-between items-center mb-8 px-2">
+                <h2 class="text-2xl font-black italic text-gray-800" id="current-view-date">Pre-trip 備忘</h2>
+                <button onclick="window.showAddItineraryModal()" class="bg-indigo-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-plus"></i></button>
+            </div>
+            <div class="itinerary-container" id="itin-wrapper">
+                <div class="itinerary-line" id="timeline-line"></div>
+                <div id="itinerary-list" class="space-y-4"></div>
+            </div>
+        </div>
+
+        <div id="page-expenses" class="page">
+            <div class="flex justify-between items-center mb-4 px-2">
+                <h2 class="text-2xl font-black italic">開支結算</h2>
+                <div class="flex gap-2">
+                    <button onclick="window.showPaybackModal()" class="bg-indigo-100 text-indigo-600 px-4 py-2 rounded-2xl text-[10px] font-black italic">還錢紀錄</button>
+                    <button onclick="window.showAddExpenseModal()" class="bg-emerald-500 text-white px-4 py-2 rounded-2xl text-[10px] font-black italic">記多一筆</button>
+                </div>
+            </div>
+            <div class="bg-slate-900 text-white rounded-[2.5rem] p-8 mb-6 shadow-2xl italic">
+                <div class="flex justify-between items-end">
+                    <div><span class="text-slate-400 text-[10px] font-black tracking-widest">總計 THB</span><div id="total-spent-thb" class="text-4xl font-black mt-1">฿0</div></div>
+                    <div class="text-right"><span class="text-slate-400 text-[10px] font-black tracking-widest">總計 HKD</span><div id="total-spent-hkd" class="text-xl font-black mt-1">$0</div></div>
+                </div>
+            </div>
+            <div id="expense-list" class="space-y-4 mb-10"></div>
+            <div id="settlement-list" class="bg-white rounded-[2rem] p-6 card space-y-4 border-t-4 border-t-emerald-400"></div>
+        </div>
+
+        <div id="page-map" class="page">
+            <div class="flex gap-2 mb-4">
+                <input id="map-search" type="text" placeholder="想去邊度？" class="flex-1 px-6 py-4 rounded-2xl border-none shadow-md font-bold outline-none focus:ring-2 ring-indigo-400">
+                <button onclick="window.searchAndShowDirections()" class="bg-slate-900 text-white px-6 rounded-2xl"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+            <div id="map-container" class="h-[450px] bg-white rounded-[2.5rem] card overflow-hidden flex items-center justify-center text-slate-300 italic">
+                <p>請輸入目的地搜尋地圖</p>
+            </div>
+        </div>
+        
+        <div id="page-documents" class="page">
+            <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-black italic">共享文件</h2><button onclick="window.triggerUpload()" class="bg-slate-900 text-white px-5 py-2 rounded-2xl text-[10px] font-black italic">上傳文件</button></div>
+            <div id="documents-list" class="space-y-3"></div>
+            <input type="file" id="file-input" class="hidden" onchange="window.handleFileSelect(event)">
+        </div>
+    </div>
+
+    <div class="fixed bottom-6 left-4 right-4 bg-white/95 backdrop-blur-xl border border-white/20 rounded-[2.5rem] max-w-2xl mx-auto z-50 shadow-2xl">
+        <div class="grid grid-cols-5 text-center py-5">
+            <div onclick="window.navigateTo('home')" class="nav-item active flex flex-col items-center"><i class="fa-solid fa-house text-lg"></i><span class="text-[9px] mt-1 font-black uppercase">Home</span></div>
+            <div onclick="window.navigateTo('itinerary')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-route text-lg"></i><span class="text-[9px] mt-1 font-black uppercase">Plan</span></div>
+            <div onclick="window.navigateTo('expenses')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-receipt text-lg"></i><span class="text-[9px] mt-1 font-black uppercase">Spend</span></div>
+            <div onclick="window.navigateTo('map')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-map text-lg"></i><span class="text-[9px] mt-1 font-black uppercase">Map</span></div>
+            <div onclick="window.navigateTo('documents')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-folder text-lg"></i><span class="text-[9px] mt-1 font-black uppercase">Docs</span></div>
+        </div>
+    </div>
+
+    <div id="modal-updates" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] px-6">
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8">
+            <h3 class="text-xl font-black mb-4 italic">最新動態 🔔</h3>
+            <div class="space-y-3 mb-8">
+                <div class="p-4 bg-slate-50 rounded-xl text-xs font-bold italic border-l-4 border-indigo-500">地圖功能、動態時間線已全面同步。</div>
+                <div class="p-4 bg-slate-50 rounded-xl text-xs font-bold italic border-l-4 border-indigo-500">Pre-trip 備忘已支持「自動移至底部」。</div>
+            </div>
+            <button onclick="window.hideModals()" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-black italic">知道了</button>
+        </div>
+    </div>
+
+    <div id="modal-itinerary" class="hidden fixed inset-0 bg-black/80 flex items-end z-[9999]">
+        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2.5rem] p-10 overflow-y-auto max-h-[90vh]">
+            <h3 id="modal-itinerary-title" class="text-xl font-black italic mb-6">更新行程事項</h3>
+            <select id="act-date" onchange="window.toggleTimeFields()" class="w-full mb-4 p-5 rounded-2xl bg-slate-100 font-bold border-none outline-none">
+                <option value="Pre">Pre-trip 備忘</option><option value="24">24/6</option><option value="25">25/6</option><option value="26">26/6</option><option value="27">27/6</option><option value="28">28/6</option><option value="29">29/6</option><option value="30">30/6</option>
+            </select>
+            <div id="time-selector" class="flex gap-2 items-center mb-4">
+                <select id="act-hour" class="flex-1 p-5 rounded-2xl bg-slate-100 font-black text-center border-none outline-none"></select>
+                <span class="font-black text-indigo-500">:</span>
+                <select id="act-min" class="flex-1 p-5 rounded-2xl bg-slate-100 font-black text-center border-none outline-none"></select>
+            </div>
+            <input id="act-title" type="text" placeholder="事項名稱" class="w-full mb-4 p-5 rounded-2xl bg-slate-100 font-bold border-none outline-none">
+            <textarea id="act-remark" placeholder="備註..." class="w-full p-5 rounded-2xl bg-slate-100 h-32 font-bold border-none outline-none mb-8"></textarea>
+            <div class="flex gap-4">
+                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic">返回</button>
+                <button id="delete-btn" onclick="window.deleteItinerary()" class="hidden flex-1 py-4 text-rose-500 font-bold italic">刪除</button>
+                <button onclick="window.saveItinerary()" class="flex-[2] py-4 bg-indigo-500 text-white rounded-2xl font-black italic shadow-lg">儲存項目</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-expense" class="hidden fixed inset-0 bg-black/80 flex items-end z-[9999]">
+        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2.5rem] p-8">
+            <h3 class="text-xl font-black mb-6 italic text-emerald-500">新增開支</h3>
+            <input id="exp-desc" type="text" placeholder="名稱" class="w-full p-4 rounded-2xl bg-slate-100 mb-4 font-bold border-none outline-none">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <input id="exp-amount" type="number" placeholder="金額" class="p-4 rounded-2xl bg-slate-100 font-bold border-none outline-none">
+                <select id="exp-currency" class="p-4 rounded-2xl bg-slate-100 font-bold border-none outline-none"><option value="THB">฿ THB</option><option value="HKD">$ HKD</option></select>
+            </div>
+            <select id="exp-paidby" class="w-full p-4 rounded-2xl bg-slate-100 mb-6 font-bold border-none outline-none"></select>
+            <div id="split-members" class="flex flex-wrap gap-2 mb-8"></div>
+            <button onclick="window.saveExpense()" class="w-full py-4 bg-emerald-500 text-white rounded-2xl font-black italic">確認記帳</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. 數據初始化與 Supabase 設定 ---
+        const groupMembers = ["Valerie", "Victoria", "Alston", "Steven", "Edward"];
+        let demoItinerary = [];
+        let demoExpenses = [];
+        let demoDocs = [];
+        let selectedDate = "Pre";
+        let editingId = null;
+
+        const SUPABASE_URL = 'https://tyvvmxmdeaugjaxhqkol.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5dnZteG1kZWF1Z2pheGhxa29sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjI4NTMsImV4cCI6MjA5MjQzODg1M30.WOibTjOXIgd-Zpbc9fXuUo_IAUuFvy2cdFn7ohrTAIQ';
+        
+        // 修正：更名避免命名衝突
+        const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // 實時監聽
+        client.channel('realtime_sync')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'itinerary' }, () => fetchData())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => fetchData())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'documents' }, () => fetchData())
+            .subscribe();
+
+        // 核心加載函數
+        async function fetchData() {
+            const { data: itin } = await client.from('itinerary').select('*');
+            const { data: exp } = await client.from('expenses').select('*');
+            const { data: docs } = await client.from('documents').select('*');
+    
+            if (itin) demoItinerary = itin;
+            if (exp) demoExpenses = exp;
+            if (docs) demoDocs = docs;
+    
+            renderItinerary();
+            renderExpenses();
+            renderDocs();
+        }
+
+        // --- 2. 頁面初始化 ---
+        window.onload = () => {
+            initDateBar();
+            initTimeSelectors();
+            fetchData();
+            window.navigateTo('home');
+        };
+
+        function initDateBar() {
+            const dates = ["Pre", "24", "25", "26", "27", "28", "29", "30"];
+            document.getElementById('calendar-strip').innerHTML = dates.map(d => `
+                <div onclick="window.filterDate('${d}')" id="date-${d}" class="date-chip flex flex-col items-center justify-center bg-white card cursor-pointer ${d === selectedDate ? 'active' : ''}">
+                    <span class="text-[9px] font-black opacity-40 uppercase text-center">${d === 'Pre' ? 'List' : 'JUNE'}</span>
+                    <span class="text-xl font-black italic">${d === 'Pre' ? '備忘' : d}</span>
+                </div>`).join('');
+        }
+
+        function initTimeSelectors() {
+            const h = document.getElementById('act-hour'); const m = document.getElementById('act-min');
+            h.innerHTML = Array.from({length: 24}, (_, i) => `<option value="${i.toString().padStart(2,'0')}">${i.toString().padStart(2,'0')}</option>`).join('');
+            m.innerHTML = Array.from({length: 12}, (_, i) => `<option value="${(i*5).toString().padStart(2,'0')}">${(i*5).toString().padStart(2,'0')}</option>`).join('');
+        }
+
+        window.navigateTo = (page) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${page}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const idx = ['home','itinerary','expenses','map','documents'].indexOf(page);
+            if(idx >= 0) document.querySelectorAll('.nav-item')[idx].classList.add('active');
+        };
+
+        window.filterDate = (d) => {
+            selectedDate = d;
+            document.querySelectorAll('.date-chip').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById(`date-${d}`); if(target) target.classList.add('active');
+            document.getElementById('current-view-date').textContent = d === 'Pre' ? 'Pre-trip 備忘' : `6月${d}日 行程`;
+            renderItinerary();
+        };
+
+        // --- 3. 行程渲染與邏輯 ---
+        function renderItinerary() {
+            const container = document.getElementById('itinerary-list');
+            const wrapper = document.getElementById('itin-wrapper');
+            const isPre = selectedDate === 'Pre';
+            let f = demoItinerary.filter(i => i.date === selectedDate);
+            
+            if(isPre) {
+                f.sort((a,b) => (a.checked === b.checked) ? 0 : a.checked ? 1 : -1);
+                wrapper.classList.add('is-pre-trip');
+            } else {
+                f.sort((a,b) => (a.time || "").localeCompare(b.time || ""));
+                wrapper.classList.remove('is-pre-trip');
+            }
+
+            if(f.length === 0) { 
+                container.innerHTML = `<div class="text-center py-20 text-slate-300 font-black italic">暫時無紀錄</div>`; 
+                return; 
+            }
+
+            container.innerHTML = f.map((item, idx) => `
+                <div onclick="window.editItinerary(${item.id})" class="itin-card card">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div onclick="event.stopPropagation(); window.toggleCheck(${item.id})" class="tick-box ${item.checked ? 'checked' : ''}">
+                                    <i class="fa-solid fa-check text-white text-xs ${item.checked ? '' : 'hidden'}"></i>
+                                </div>
+                                ${!isPre && item.time ? `<span class="time-bubble">${item.time}</span>` : ''}
+                            </div>
+                            <div class="font-black text-xl text-slate-800 leading-tight ${item.checked ? 'completed-text' : ''}">${item.title}</div>
+                            ${item.remark ? `<div class="bg-slate-50 p-4 rounded-2xl text-[11px] font-bold text-slate-500 italic mt-3">${item.remark}</div>` : ''}
+                        </div>
+                    </div>
+                </div>`).join('');
+        }
+
+        window.toggleCheck = async (id) => {
+            const item = demoItinerary.find(i => i.id === id);
+            if (!item) return;
+            const { error } = await client.from('itinerary').update({ checked: !item.checked }).eq('id', id);
+            if (error) alert("操作失敗");
+        };
+
+        window.showAddItineraryModal = () => {
+            editingId = null; document.getElementById('modal-itinerary-title').textContent = "新增規劃";
+            document.getElementById('delete-btn').classList.add('hidden');
+            document.getElementById('act-date').value = selectedDate;
+            document.getElementById('act-title').value = ""; document.getElementById('act-remark').value = "";
+            window.toggleTimeFields(); document.getElementById('modal-itinerary').classList.remove('hidden');
+        };
+
+        window.editItinerary = (id) => {
+            editingId = id; const item = demoItinerary.find(i => i.id === id);
+            document.getElementById('delete-btn').classList.remove('hidden');
+            document.getElementById('act-date').value = item.date;
+            if(item.time) { 
+                const [h, m] = item.time.split(':');
+                document.getElementById('act-hour').value = h;
+                document.getElementById('act-min').value = m;
+            }
+            document.getElementById('act-title').value = item.title;
+            document.getElementById('act-remark').value = item.remark || "";
+            window.toggleTimeFields(); document.getElementById('modal-itinerary').classList.remove('hidden');
+        };
+
+        window.saveItinerary = async () => {
+            const title = document.getElementById('act-title').value; if(!title) return;
+            const isPre = document.getElementById('act-date').value === 'Pre';
+            const timeStr = isPre ? '' : `${document.getElementById('act-hour').value}:${document.getElementById('act-min').value}`;
+            const data = { 
+                id: editingId || Date.now(), 
+                date: document.getElementById('act-date').value, 
+                time: timeStr, title, 
+                remark: document.getElementById('act-remark').value, 
+                checked: editingId ? (demoItinerary.find(i => i.id === editingId).checked || false) : false 
+            };
+            const { error } = await client.from('itinerary').upsert(data);
+            if (error) alert("儲存失敗"); else window.hideModals();
+        };
+
+        window.deleteItinerary = async () => {
+            if(confirm("確定刪除？")) {
+                const { error } = await client.from('itinerary').delete().eq('id', editingId);
+                if (!error) window.hideModals();
+            }
+        };
+
+        window.toggleTimeFields = () => {
+            document.getElementById('time-selector').style.display = document.getElementById('act-date').value === 'Pre' ? 'none' : 'flex';
+        };
+
+        // --- 4. 開支與分賬邏輯 ---
+        window.quickAddExpense = () => { window.navigateTo('expenses'); window.showAddExpenseModal(); };
+        window.quickAddPlan = () => { window.navigateTo('itinerary'); window.showAddItineraryModal(); };
+        
+        window.showAddExpenseModal = () => {
+            document.getElementById('exp-paidby').innerHTML = groupMembers.map(m => `<option value="${m}">${m}</option>`).join('');
+            document.getElementById('split-members').innerHTML = groupMembers.map(m => `<label class="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-xl text-[10px] font-bold"><input type="checkbox" value="${m}" checked> ${m}</label>`).join('');
+            document.getElementById('modal-expense').classList.remove('hidden');
+        };
+
+        window.saveExpense = async () => {
+            const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
+            const split = Array.from(document.querySelectorAll('#split-members input:checked')).map(cb => cb.value);
+            const desc = document.getElementById('exp-desc').value;
+            if(amount <= 0 || !split.length || !desc) return;
+            const newExpense = {
+                id: Date.now(), desc, amount,
+                currency: document.getElementById('exp-currency').value,
+                paid_by: document.getElementById('exp-paidby').value,
+                split
+            };
+            const { error } = await client.from('expenses').insert(newExpense);
+            if (!error) window.hideModals();
+        };
+
+        function renderExpenses() {
+            const container = document.getElementById('expense-list');
+            const bal = {}; groupMembers.forEach(m => bal[m] = {THB: 0, HKD: 0});
+            let thbTotal = 0, hkdTotal = 0;
+            
+            container.innerHTML = demoExpenses.map(item => {
+                if(item.currency === 'THB') thbTotal += item.amount; else hkdTotal += item.amount;
+                const share = item.amount / item.split.length;
+                bal[item.paid_by][item.currency] += item.amount;
+                item.split.forEach(m => bal[m][item.currency] -= share);
+                return `<div class="bg-white p-5 rounded-3xl card flex justify-between items-center"><div><div class="font-black text-slate-800">${item.desc}</div><div class="text-[9px] font-bold text-slate-400 italic">${item.paid_by} Paid</div></div><div class="text-xl font-black italic">${item.currency==='THB'?'฿':'$'}${item.amount.toLocaleString()}</div></div>`;
+            }).join('');
+            
+            document.getElementById('total-spent-thb').textContent = `฿${thbTotal.toLocaleString()}`;
+            document.getElementById('total-spent-hkd').textContent = `$${hkdTotal.toLocaleString()}`;
+            
+            document.getElementById('settlement-list').innerHTML = groupMembers.map(m => {
+                const t = bal[m].THB; const h = bal[m].HKD;
+                return `<div class="flex justify-between items-start border-b border-slate-50 pb-3 last:border-0"><span class="font-bold text-gray-700 text-sm italic">${m}</span><div class="text-right"><div class="font-black text-xs ${t>=0?'text-emerald-500':'text-rose-400'}">${t.toFixed(0)}</div><div class="font-black text-[10px] ${h>=0?'text-emerald-600':'text-rose-600'}">${h.toFixed(0)}</div></div></div>`;
+            }).join('');
+        }
+
+        // --- 5. 地圖與文件 ---
+        window.searchAndShowDirections = () => {
+            const q = document.getElementById('map-search').value; if(!q) return;
+            document.getElementById('map-container').innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0; border-radius:2.5rem;" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&output=embed"></iframe>`;
+        };
+
+        window.triggerUpload = () => document.getElementById('file-input').click();
+        window.handleFileSelect = async (e) => {
+            const file = e.target.files[0];
+            if(file) {
+                const newDoc = { id: Date.now(), name: file.name, date: new Date().toLocaleDateString() };
+                await client.from('documents').insert(newDoc);
+            }
+        };
+
+        function renderDocs() {
+            document.getElementById('documents-list').innerHTML = demoDocs.map(doc => `
+                <div class="bg-white p-5 rounded-3xl card flex items-center gap-4">
+                    <div class="bg-indigo-50 w-10 h-10 rounded-xl flex items-center justify-center text-indigo-500"><i class="fa-solid fa-file"></i></div>
+                    <div><div class="text-sm font-black text-gray-800">${doc.name}</div><div class="text-[9px] font-bold text-slate-400 italic">${doc.date}</div></div>
+                </div>`).join('');
+        }
+
+        window.showUpdates = () => document.getElementById('modal-updates').classList.remove('hidden');
+        window.hideModals = () => document.querySelectorAll('[id^="modal-"]').forEach(m => m.classList.add('hidden'));
+    </script>
+</body>
+</html>
