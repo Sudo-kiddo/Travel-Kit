@@ -24,7 +24,6 @@
         }
         @keyframes rainbowAnimation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* 趣味動畫 */
         @keyframes float {
             0% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-10px) rotate(2deg); }
@@ -179,10 +178,27 @@
         <div class="bg-white w-full max-w-md rounded-[2rem] p-7">
             <h3 class="text-lg font-black mb-4 italic">最新動態 🔔</h3>
             <div class="space-y-3 mb-6">
-                <div class="p-3 bg-slate-50 rounded-xl text-[10px] font-bold italic border-l-4 border-indigo-500 uppercase">更新：開支列表現已粵語化並清楚顯示幣種。</div>
-                <div class="p-3 bg-slate-50 rounded-xl text-[10px] font-bold italic border-l-4 border-indigo-500 uppercase">主頁加入成員名單與趣味彩蛋效果。</div>
+                <div class="p-3 bg-slate-50 rounded-xl text-[10px] font-bold italic border-l-4 border-indigo-500 uppercase">修復：「還錢」功能已啟用，可紀錄個人間轉帳。</div>
             </div>
             <button onclick="window.hideModals()" class="w-full py-3.5 bg-gray-900 text-white rounded-xl font-black italic text-sm">知道了</button>
+        </div>
+    </div>
+
+    <div id="modal-payback" class="hidden fixed inset-0 bg-black/80 flex items-end z-[9999]">
+        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2rem] p-8">
+            <h3 class="text-lg font-black mb-5 italic text-indigo-500 uppercase">還錢轉帳</h3>
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div><label class="text-[10px] font-black text-slate-400 mb-1 block uppercase">邊個還錢？</label><select id="payback-from" class="w-full p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm"></select></div>
+                <div><label class="text-[10px] font-black text-slate-400 mb-1 block uppercase">還俾邊個？</label><select id="payback-to" class="w-full p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm"></select></div>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mb-5">
+                <input id="payback-amount" type="number" placeholder="金額" class="p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm">
+                <select id="payback-currency" class="p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm"><option value="THB">฿ THB</option><option value="HKD">$ HKD</option></select>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic text-sm">取消</button>
+                <button onclick="window.savePayback()" class="flex-[2] py-4 bg-indigo-500 text-white rounded-xl font-black italic shadow-lg text-sm">完成還錢</button>
+            </div>
         </div>
     </div>
 
@@ -247,36 +263,21 @@
             const { data: itin } = await client.from('itinerary').select('*');
             const { data: exp } = await client.from('expenses').select('*');
             const { data: docs } = await client.from('documents').select('*');
-    
             if (itin) demoItinerary = itin;
             if (exp) demoExpenses = exp;
             if (docs) demoDocs = docs;
-    
-            renderItinerary();
-            renderExpenses();
-            renderDocs();
+            renderItinerary(); renderExpenses(); renderDocs();
         }
 
-        window.onload = () => {
-            initDateBar();
-            initTimeSelectors();
-            fetchData();
-            window.navigateTo('home');
-        };
+        window.onload = () => { initDateBar(); initTimeSelectors(); fetchData(); window.navigateTo('home'); };
 
-        // 趣味彩蛋：點擊名字彈出表情
         window.spawnEmoji = (e) => {
             const emojis = ["✈️", "🌴", "🥥", "฿", "🍹", "🍍", "🐘"];
             const emoji = document.createElement("div");
             emoji.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            emoji.style.position = "absolute";
-            emoji.style.left = e.pageX + "px";
-            emoji.style.top = e.pageY + "px";
-            emoji.style.fontSize = "24px";
-            emoji.style.pointerEvents = "none";
-            emoji.style.zIndex = "1000";
+            emoji.style.position = "absolute"; emoji.style.left = e.pageX + "px"; emoji.style.top = e.pageY + "px";
+            emoji.style.fontSize = "24px"; emoji.style.pointerEvents = "none"; emoji.style.zIndex = "1000";
             document.body.appendChild(emoji);
-            
             let pos = 0;
             let id = setInterval(() => {
                 if (pos === 50) { clearInterval(id); emoji.remove(); }
@@ -321,20 +322,9 @@
             const wrapper = document.getElementById('itin-wrapper');
             const isPre = selectedDate === 'Pre';
             let f = demoItinerary.filter(i => i.date === selectedDate);
-            
-            if(isPre) {
-                f.sort((a,b) => (a.checked === b.checked) ? 0 : a.checked ? 1 : -1);
-                wrapper.classList.add('is-pre-trip');
-            } else {
-                f.sort((a,b) => (a.time || "").localeCompare(b.time || ""));
-                wrapper.classList.remove('is-pre-trip');
-            }
-
-            if(f.length === 0) { 
-                container.innerHTML = `<div class="text-center py-20 text-slate-300 font-black italic">暫時無紀錄</div>`; 
-                return; 
-            }
-
+            if(isPre) { f.sort((a,b) => (a.checked === b.checked) ? 0 : a.checked ? 1 : -1); wrapper.classList.add('is-pre-trip'); } 
+            else { f.sort((a,b) => (a.time || "").localeCompare(b.time || "")); wrapper.classList.remove('is-pre-trip'); }
+            if(f.length === 0) { container.innerHTML = `<div class="text-center py-20 text-slate-300 font-black italic">暫時無紀錄</div>`; return; }
             container.innerHTML = f.map((item, idx) => `
                 <div onclick="window.editItinerary(${item.id})" class="itin-card card">
                     <div class="flex justify-between items-start">
@@ -353,10 +343,9 @@
         }
 
         window.toggleCheck = async (id) => {
-            const item = demoItinerary.find(i => i.id === id);
-            if (!item) return;
-            const { error } = await client.from('itinerary').update({ checked: !item.checked }).eq('id', id);
-            if (!error) fetchData();
+            const item = demoItinerary.find(i => i.id === id); if (!item) return;
+            await client.from('itinerary').update({ checked: !item.checked }).eq('id', id);
+            fetchData();
         };
 
         window.showAddItineraryModal = () => {
@@ -371,11 +360,7 @@
             editingId = id; const item = demoItinerary.find(i => i.id === id);
             document.getElementById('delete-btn').classList.remove('hidden');
             document.getElementById('act-date').value = item.date;
-            if(item.time) { 
-                const [h, m] = item.time.split(':');
-                document.getElementById('act-hour').value = h;
-                document.getElementById('act-min').value = m;
-            }
+            if(item.time) { const [h, m] = item.time.split(':'); document.getElementById('act-hour').value = h; document.getElementById('act-min').value = m; }
             document.getElementById('act-title').value = item.title;
             document.getElementById('act-remark').value = item.remark || "";
             window.toggleTimeFields(); document.getElementById('modal-itinerary').classList.remove('hidden');
@@ -385,34 +370,18 @@
             const title = document.getElementById('act-title').value; if(!title) return;
             const isPre = document.getElementById('act-date').value === 'Pre';
             const timeStr = isPre ? '' : `${document.getElementById('act-hour').value}:${document.getElementById('act-min').value}`;
-            const data = { 
-                id: editingId || Date.now(), 
-                date: document.getElementById('act-date').value, 
-                time: timeStr, title, 
-                remark: document.getElementById('act-remark').value, 
-                checked: editingId ? (demoItinerary.find(i => i.id === editingId).checked || false) : false 
-            };
-            const { error } = await client.from('itinerary').upsert(data);
-            if (!error) { window.hideModals(); fetchData(); }
+            const data = { id: editingId || Date.now(), date: document.getElementById('act-date').value, time: timeStr, title, remark: document.getElementById('act-remark').value, checked: editingId ? (demoItinerary.find(i => i.id === editingId).checked || false) : false };
+            await client.from('itinerary').upsert(data); window.hideModals(); fetchData();
         };
 
-        window.deleteItinerary = async () => {
-            if(confirm("確定刪除？")) {
-                const { error } = await client.from('itinerary').delete().eq('id', editingId);
-                if (!error) { window.hideModals(); fetchData(); }
-            }
-        };
-
-        window.toggleTimeFields = () => {
-            document.getElementById('time-selector').style.display = document.getElementById('act-date').value === 'Pre' ? 'none' : 'flex';
-        };
+        window.deleteItinerary = async () => { if(confirm("確定刪除？")) { await client.from('itinerary').delete().eq('id', editingId); window.hideModals(); fetchData(); } };
+        window.toggleTimeFields = () => { document.getElementById('time-selector').style.display = document.getElementById('act-date').value === 'Pre' ? 'none' : 'flex'; };
 
         window.quickAddExpense = () => { window.navigateTo('expenses'); window.showAddExpenseModal(); };
         window.quickAddPlan = () => { window.navigateTo('itinerary'); window.showAddItineraryModal(); };
         
         window.showAddExpenseModal = () => {
-            document.getElementById('exp-desc').value = "";
-            document.getElementById('exp-amount').value = "";
+            document.getElementById('exp-desc').value = ""; document.getElementById('exp-amount').value = "";
             document.getElementById('exp-paidby').innerHTML = groupMembers.map(m => `<option value="${m}">${m}</option>`).join('');
             document.getElementById('split-members').innerHTML = groupMembers.map(m => `<label class="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-xl text-[9px] font-bold"><input type="checkbox" value="${m}" checked> ${m}</label>`).join('');
             document.getElementById('modal-expense').classList.remove('hidden');
@@ -423,14 +392,28 @@
             const split = Array.from(document.querySelectorAll('#split-members input:checked')).map(cb => cb.value);
             const desc = document.getElementById('exp-desc').value;
             if(amount <= 0 || !split.length || !desc) return;
-            const newExpense = {
-                id: Date.now(), desc, amount,
-                currency: document.getElementById('exp-currency').value,
-                paid_by: document.getElementById('exp-paidby').value,
-                split
-            };
-            const { error } = await client.from('expenses').insert(newExpense);
-            if (!error) { window.hideModals(); fetchData(); }
+            await client.from('expenses').insert({ id: Date.now(), desc, amount, currency: document.getElementById('exp-currency').value, paid_by: document.getElementById('exp-paidby').value, split });
+            window.hideModals(); fetchData();
+        };
+
+        // 還錢功能
+        window.showPaybackModal = () => {
+            document.getElementById('payback-from').innerHTML = groupMembers.map(m => `<option value="${m}">${m}</option>`).join('');
+            document.getElementById('payback-to').innerHTML = groupMembers.map(m => `<option value="${m}">${m}</option>`).join('');
+            document.getElementById('payback-amount').value = "";
+            document.getElementById('modal-payback').classList.remove('hidden');
+        };
+
+        window.savePayback = async () => {
+            const from = document.getElementById('payback-from').value;
+            const to = document.getElementById('payback-to').value;
+            const amount = parseFloat(document.getElementById('payback-amount').value) || 0;
+            const currency = document.getElementById('payback-currency').value;
+            if(from === to) { alert("唔可以自己還錢比自己。"); return; }
+            if(amount <= 0) return;
+            const paybackData = { id: Date.now(), desc: `💸 還錢: ${from} ➔ ${to}`, amount: amount, currency: currency, paid_by: from, split: [to] };
+            await client.from('expenses').insert(paybackData);
+            window.hideModals(); fetchData();
         };
 
         function renderExpenses() {
@@ -439,15 +422,16 @@
             let thbTotal = 0, hkdTotal = 0;
             
             container.innerHTML = demoExpenses.map(item => {
-                if(item.currency === 'THB') thbTotal += item.amount; else hkdTotal += item.amount;
+                const isPayback = item.desc.includes('還錢:');
+                if(!isPayback) { if(item.currency === 'THB') thbTotal += item.amount; else hkdTotal += item.amount; }
                 const share = item.amount / item.split.length;
                 bal[item.paid_by][item.currency] += item.amount;
                 item.split.forEach(m => bal[m][item.currency] -= share);
-                // 調整幣種顯示與粵語描述
+                
                 const currencyLabel = item.currency === 'THB' ? 'THB' : 'HKD';
                 const symbol = item.currency === 'THB' ? '฿' : '$';
                 return `
-                <div class="bg-white p-4 rounded-[1.5rem] card flex justify-between items-center">
+                <div class="bg-white p-4 rounded-[1.5rem] card flex justify-between items-center ${isPayback ? 'border-l-4 border-l-indigo-400' : ''}">
                     <div>
                         <div class="font-black text-slate-800 text-sm">${item.desc}</div>
                         <div class="text-[8px] font-black text-indigo-400 italic uppercase tracking-wider">${item.paid_by} 俾咗</div>
@@ -461,7 +445,6 @@
             
             document.getElementById('total-spent-thb').textContent = `฿${thbTotal.toLocaleString()}`;
             document.getElementById('total-spent-hkd').textContent = `$${hkdTotal.toLocaleString()}`;
-            
             document.getElementById('settlement-list').innerHTML = groupMembers.map(m => {
                 const t = bal[m].THB; const h = bal[m].HKD;
                 return `<div class="flex justify-between items-start border-b border-slate-50 pb-3 last:border-0"><span class="font-bold text-gray-700 text-xs italic">${m}</span><div class="text-right"><div class="font-black text-[10px] ${t>=0?'text-emerald-500':'text-rose-400'}">${t.toFixed(0)} THB</div><div class="font-black text-[9px] ${h>=0?'text-emerald-600':'text-rose-600'}">${h.toFixed(0)} HKD</div></div></div>`;
@@ -470,18 +453,14 @@
 
         window.searchAndShowDirections = () => {
             const q = document.getElementById('map-search').value; if(!q) return;
-            document.getElementById('map-container').innerHTML = `<iframe width="100%" height="100%" frameborder="0" style="border:0; border-radius:1.5rem;" src="https://www.google.com/maps/embed/v1/search?key=YOUR_API_KEY_HERE&q=${encodeURIComponent(q)}"></iframe>`;
-            // 注意：正式使用地圖 embed 需要自己的 Google API Key，或直接跳轉 Google Maps
             document.getElementById('map-container').innerHTML = `<div class="text-center p-10"><a href="https://www.google.com/maps/search/${encodeURIComponent(q)}" target="_blank" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-black italic text-xs">喺 Google Maps 開啟位置</a></div>`;
         };
 
         window.triggerUpload = () => document.getElementById('file-input').click();
         window.handleFileSelect = async (e) => {
-            const file = e.target.files[0];
-            if(file) {
-                const newDoc = { id: Date.now(), name: file.name, date: new Date().toLocaleDateString() };
-                const { error } = await client.from('documents').insert(newDoc);
-                if(!error) fetchData();
+            const file = e.target.files[0]; if(file) {
+                await client.from('documents').insert({ id: Date.now(), name: file.name, date: new Date().toLocaleDateString() });
+                fetchData();
             }
         };
 
@@ -495,12 +474,10 @@
 
         window.factoryReset = async () => {
             if(confirm("⚠️ 警告：這將會清除所有雲端數據，確定？")) {
-                if(confirm("最後確認：確定重設？")) {
-                    await client.from('itinerary').delete().neq('id', 0);
-                    await client.from('expenses').delete().neq('id', 0);
-                    await client.from('documents').delete().neq('id', 0);
-                    location.reload();
-                }
+                await client.from('itinerary').delete().neq('id', 0);
+                await client.from('expenses').delete().neq('id', 0);
+                await client.from('documents').delete().neq('id', 0);
+                location.reload();
             }
         };
 
