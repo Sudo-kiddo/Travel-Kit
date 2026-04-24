@@ -15,6 +15,7 @@
             background-color: #f8fafc; 
             min-height: 100dvh; 
             overflow-x: hidden;
+            font-size: 16px; 
         }
         
         .bg-gradient-rainbow { 
@@ -44,26 +45,54 @@
         
         .nav-item { transition: all 0.2s; cursor: pointer; color: #94a3b8; }
         .nav-item.active { color: #f472b6; font-weight: 900; } 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
         
-        .date-chip { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); flex-shrink: 0; width: 68px; height: 76px; border-radius: 1.25rem; }
-        .date-chip.active { background-color: #6366f1; color: white; transform: translateY(-5px); box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.5); } 
+        /* 滾動容器增加 padding-top 確保選中狀態的按鈕向上跳動時不被遮擋 */
+        .calendar-scroll-container { 
+            display: flex; 
+            overflow-x: auto; 
+            white-space: nowrap; 
+            -webkit-overflow-scrolling: touch; 
+            gap: 1rem; 
+            padding: 15px 10px 1.2rem 10px; 
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* 圓形按鈕 */
+        .date-chip { 
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            flex-shrink: 0; 
+            width: 72px; 
+            height: 72px; 
+            border-radius: 50%; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        /* 調整 transform 確保向上移動時在 padding 範圍內 */
+        .date-chip.active { 
+            background-color: #6366f1; 
+            color: white; 
+            transform: translateY(-8px); 
+            box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.5); 
+        } 
         
         .itinerary-container { position: relative; padding-left: 18px; min-height: 200px; }
         .itinerary-line { position: absolute; left: 6px; top: 20px; bottom: 20px; width: 3px; background: #e2e8f0; border-radius: 10px; overflow: hidden; }
         .itinerary-line::after { content: ""; position: absolute; top: -100px; left: 0; width: 100%; height: 100px; background: linear-gradient(to bottom, transparent, #6366f1, transparent); animation: flowLine 3s infinite linear; }
         @keyframes flowLine { 0% { top: -100px; } 100% { top: 100%; } }
 
-        .itin-card { position: relative; background: white; border-radius: 2rem; padding: 1.25rem; margin-bottom: 1.25rem; transition: all 0.3s ease; width: 100%; }
-        .itin-card::before { content: ""; position: absolute; left: -19px; top: 28px; width: 10px; height: 10px; background: white; border: 2.5px solid #6366f1; border-radius: 50%; z-index: 10; }
+        .itin-card { position: relative; background: white; border-radius: 2rem; padding: 1.5rem; margin-bottom: 1.25rem; transition: all 0.3s ease; width: 100%; }
+        .itin-card::before { content: ""; position: absolute; left: -19px; top: 32px; width: 10px; height: 10px; background: white; border: 2.5px solid #6366f1; border-radius: 50%; z-index: 10; }
         .is-pre-trip .itin-card::before { display: none; }
         .is-pre-trip .itinerary-line { display: none; }
         .is-pre-trip .itinerary-container { padding-left: 0; }
 
         .completed-text { text-decoration: line-through; opacity: 0.5; }
-        .time-bubble { background: #6366f1; color: white; font-weight: 900; font-style: italic; padding: 3px 10px; border-radius: 8px; font-size: 10px; }
+        .time-bubble { background: #6366f1; color: white; font-weight: 900; font-style: italic; padding: 4px 12px; border-radius: 10px; font-size: 11px; }
 
-        .tick-box { width: 26px; height: 26px; border-radius: 50%; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+        .tick-box { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #e2e8f0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
         .tick-box.checked { background: #10b981; border-color: #10b981; }
         
         * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
@@ -72,13 +101,14 @@
 <body class="pb-32 overflow-x-hidden">
 
     <div class="bg-gradient-rainbow text-white sticky top-0 z-50 shadow-lg w-full">
-        <div class="max-w-2xl mx-auto px-5 py-4 flex items-center justify-between">
+        <div class="max-w-2xl mx-auto px-5 py-5 flex items-center justify-between">
             <div>
-                <h1 class="text-xl font-black italic tracking-tighter text-white">2026 Summer Thai Trip</h1>
-                <p class="text-[9px] tracking-[0.2em] opacity-90 uppercase font-bold text-white">24/6 – 30/6 • 泰國之行</p>
+                <h1 class="text-2xl font-black italic tracking-tighter text-white">2026 Summer Thai Trip</h1>
+                <p class="text-[10px] tracking-[0.2em] opacity-90 uppercase font-bold text-white">24/6 – 01/7 • 泰國之行</p>
             </div>
-            <button onclick="window.showUpdates()" class="bg-white/20 backdrop-blur-md w-10 h-10 rounded-full flex items-center justify-center border border-white/30 active:scale-90">
-                <i class="fa-solid fa-bell text-xs text-white"></i>
+            <button onclick="window.showUpdates()" class="bg-white/20 backdrop-blur-md w-11 h-11 rounded-full flex items-center justify-center border border-white/30 active:scale-90 relative">
+                <i class="fa-solid fa-bell text-sm text-white"></i>
+                <span id="update-dot" class="hidden absolute top-2 right-2 w-2.5 h-2.5 bg-rose-500 rounded-full border border-white"></span>
             </button>
         </div>
     </div>
@@ -86,156 +116,170 @@
     <div class="max-w-2xl mx-auto px-4 pt-6 w-full">
         
         <div id="page-home" class="page active">
-            <div class="bg-white rounded-[2.5rem] p-8 card text-center border-t-4 border-t-indigo-400 relative overflow-hidden">
-                <div class="absolute -top-4 -right-4 text-4xl opacity-20 animate-float">☁️</div>
-                <div class="absolute top-10 -left-6 text-3xl opacity-20 animate-float" style="animation-delay: 1s;">☁️</div>
+            <div class="bg-white rounded-[2.5rem] p-9 card text-center border-t-4 border-t-indigo-400 relative overflow-hidden">
+                <div class="absolute -top-4 -right-4 text-5xl opacity-20 animate-float">☁️</div>
+                <div class="absolute top-10 -left-6 text-4xl opacity-20 animate-float" style="animation-delay: 1s;">☁️</div>
                 
-                <div class="text-6xl mb-4 animate-float">☀️</div>
-                <h2 class="text-2xl font-black italic text-gray-800">同陽光玩遊戲！</h2>
+                <div class="text-7xl mb-4 animate-float">☀️</div>
+                <h2 class="text-3xl font-black italic text-gray-800">同陽光玩遊戲！</h2>
                 
-                <div class="mt-4 flex flex-wrap justify-center gap-2" id="home-members">
-                    <span onclick="window.spawnEmoji(event)" class="px-3 py-1 bg-indigo-50 text-indigo-500 rounded-full text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-indigo-100">Valerie</span>
-                    <span onclick="window.spawnEmoji(event)" class="px-3 py-1 bg-pink-50 text-pink-500 rounded-full text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-pink-100">Victoria</span>
-                    <span onclick="window.spawnEmoji(event)" class="px-3 py-1 bg-emerald-50 text-emerald-500 rounded-full text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-emerald-100">Alston</span>
-                    <span onclick="window.spawnEmoji(event)" class="px-3 py-1 bg-amber-50 text-amber-500 rounded-full text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-amber-100">Steven</span>
-                    <span onclick="window.spawnEmoji(event)" class="px-3 py-1 bg-blue-50 text-blue-500 rounded-full text-[10px] font-black uppercase tracking-wider cursor-pointer hover:bg-blue-100">Edward</span>
+                <div class="mt-6 flex flex-wrap justify-center gap-2.5" id="home-members">
+                    <span onclick="window.spawnEmoji(event)" class="px-4 py-1.5 bg-indigo-50 text-indigo-500 rounded-full text-[11px] font-black uppercase tracking-wider cursor-pointer">Valerie</span>
+                    <span onclick="window.spawnEmoji(event)" class="px-4 py-1.5 bg-pink-50 text-pink-500 rounded-full text-[11px] font-black uppercase tracking-wider cursor-pointer">Victoria</span>
+                    <span onclick="window.spawnEmoji(event)" class="px-4 py-1.5 bg-emerald-50 text-emerald-500 rounded-full text-[11px] font-black uppercase tracking-wider cursor-pointer">Alston</span>
+                    <span onclick="window.spawnEmoji(event)" class="px-4 py-1.5 bg-amber-50 text-amber-500 rounded-full text-[11px] font-black uppercase tracking-wider cursor-pointer">Steven</span>
+                    <span onclick="window.spawnEmoji(event)" class="px-4 py-1.5 bg-blue-50 text-blue-500 rounded-full text-[11px] font-black uppercase tracking-wider cursor-pointer">Edward</span>
                 </div>
 
-                <div class="grid grid-cols-1 gap-4 mt-10 mb-8">
-                    <button onclick="window.quickAddExpense()" class="btn-pulse w-full bg-emerald-500 text-white p-6 rounded-[2rem] flex items-center justify-between shadow-lg shadow-emerald-100">
-                        <div class="flex items-center gap-3"><div class="bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center"><i class="fa-solid fa-receipt text-lg"></i></div><span class="font-black italic uppercase text-sm">新增開支項目</span></div>
-                        <i class="fa-solid fa-chevron-right opacity-50 text-xs"></i>
+                <div class="grid grid-cols-1 gap-4 mt-12 mb-8">
+                    <button onclick="window.quickAddExpense()" class="btn-pulse w-full bg-emerald-500 text-white p-7 rounded-[2rem] flex items-center justify-between shadow-lg">
+                        <div class="flex items-center gap-4"><div class="bg-white/20 w-11 h-11 rounded-xl flex items-center justify-center"><i class="fa-solid fa-receipt text-xl"></i></div><span class="font-black italic uppercase text-base">新增開支項目</span></div>
+                        <i class="fa-solid fa-chevron-right opacity-50 text-sm"></i>
                     </button>
-                    <button onclick="window.quickAddPlan()" class="w-full bg-indigo-500 text-white p-6 rounded-[2rem] flex items-center justify-between shadow-lg shadow-indigo-100">
-                        <div class="flex items-center gap-3"><div class="bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center"><i class="fa-solid fa-map-pin text-lg"></i></div><span class="font-black italic uppercase text-sm">更新行程規劃</span></div>
-                        <i class="fa-solid fa-chevron-right opacity-50 text-xs"></i>
+                    <button onclick="window.quickAddPlan()" class="btn-pulse w-full bg-indigo-500 text-white p-7 rounded-[2rem] flex items-center justify-between shadow-lg">
+                        <div class="flex items-center gap-4"><div class="bg-white/20 w-11 h-11 rounded-xl flex items-center justify-center"><i class="fa-solid fa-map-pin text-xl"></i></div><span class="font-black italic uppercase text-base">更新行程規劃</span></div>
+                        <i class="fa-solid fa-chevron-right opacity-50 text-sm"></i>
                     </button>
                 </div>
                 <div class="opacity-20">
-                    <button onclick="window.factoryReset()" class="text-[9px] font-black text-slate-400 uppercase tracking-widest border border-slate-200 px-3 py-2 rounded-full">Reset System</button>
+                    <button onclick="window.factoryReset()" class="text-[10px] font-black text-slate-400 uppercase tracking-widest border border-slate-200 px-4 py-2 rounded-full">Reset System</button>
                 </div>
             </div>
         </div>
 
         <div id="page-itinerary" class="page">
-            <div class="flex gap-2 overflow-x-auto pb-5 no-scrollbar" id="calendar-strip"></div>
+            <div class="calendar-scroll-container no-scrollbar" id="calendar-strip"></div>
             <div class="flex justify-between items-center mb-6 px-1">
-                <h2 class="text-xl font-black italic text-gray-800" id="current-view-date">Pre-trip 備忘</h2>
-                <button onclick="window.showAddItineraryModal()" class="bg-indigo-500 text-white w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-plus"></i></button>
+                <h2 class="text-2xl font-black italic text-gray-800" id="current-view-date">Pre-trip 備忘</h2>
+                <button onclick="window.showAddItineraryModal()" class="bg-indigo-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-plus text-lg"></i></button>
             </div>
             <div class="itinerary-container" id="itin-wrapper">
                 <div class="itinerary-line" id="timeline-line"></div>
-                <div id="itinerary-list" class="space-y-3"></div>
+                <div id="itinerary-list" class="space-y-4"></div>
             </div>
         </div>
 
         <div id="page-expenses" class="page">
-            <div class="flex justify-between items-center mb-4 px-1">
-                <h2 class="text-xl font-black italic">開支結算</h2>
+            <div class="flex justify-between items-center mb-5 px-1">
                 <div class="flex gap-2">
-                    <button onclick="window.showPaybackModal()" class="bg-indigo-100 text-indigo-600 px-3 py-2 rounded-xl text-[9px] font-black italic">還錢</button>
-                    <button onclick="window.showAddExpenseModal()" class="bg-emerald-500 text-white px-3 py-2 rounded-xl text-[9px] font-black italic">新增</button>
+                    <button onclick="window.showAddExpenseModal()" class="bg-emerald-500 text-white px-5 py-3 rounded-2xl text-[11px] font-black italic shadow-md">➕ 記帳</button>
+                    <button onclick="window.showPaybackModal()" class="bg-indigo-100 text-indigo-600 px-5 py-3 rounded-2xl text-[11px] font-black italic">💸 轉帳</button>
                 </div>
+                <button onclick="window.resetExpenseData()" class="bg-rose-50 text-rose-500 px-4 py-3 rounded-2xl text-[11px] font-black italic border border-rose-100">🗑️ 清空</button>
             </div>
-            <div class="bg-slate-900 text-white rounded-[2rem] p-6 mb-5 shadow-2xl italic">
+            
+            <div class="bg-gradient-to-br from-rose-400 to-pink-500 text-white rounded-[2.2rem] p-7 mb-6 shadow-xl italic">
                 <div class="flex justify-between items-end">
-                    <div><span class="text-slate-400 text-[9px] font-black tracking-widest">總計 THB</span><div id="total-spent-thb" class="text-3xl font-black mt-1">฿0</div></div>
-                    <div class="text-right"><span class="text-slate-400 text-[9px] font-black tracking-widest">總計 HKD</span><div id="total-spent-hkd" class="text-lg font-black mt-1">$0</div></div>
+                    <div>
+                        <span class="text-white/70 text-[10px] font-black tracking-widest uppercase">總計 THB</span>
+                        <div class="flex items-baseline gap-1 mt-1">
+                            <span class="text-2xl font-black">฿</span><span id="total-spent-thb" class="text-4xl font-black">0</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-white/70 text-[10px] font-black tracking-widest uppercase">總計 HKD</span>
+                        <div class="flex items-baseline gap-1 mt-1 justify-end">
+                            <span class="text-lg font-black">$</span><span id="total-spent-hkd" class="text-2xl font-black">0</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div id="expense-list" class="space-y-3 mb-8"></div>
-            <div id="settlement-list" class="bg-white rounded-[1.8rem] p-5 card space-y-3 border-t-4 border-t-emerald-400"></div>
+
+            <div id="expense-list" class="space-y-4 mb-8"></div>
+            <div id="settlement-list" class="bg-white rounded-[2rem] p-6 card space-y-4 border-t-4 border-t-emerald-400"></div>
         </div>
 
         <div id="page-map" class="page">
             <div class="flex gap-2 mb-4">
-                <input id="map-search" type="text" placeholder="想去邊度？" class="flex-1 px-5 py-3.5 rounded-xl border-none shadow-md font-bold outline-none focus:ring-2 ring-indigo-400 text-sm">
-                <button onclick="window.searchAndShowDirections()" class="bg-slate-900 text-white px-5 rounded-xl"><i class="fa-solid fa-magnifying-glass"></i></button>
+                <input id="map-search" type="text" placeholder="想去邊度？" class="flex-1 px-6 py-4 rounded-2xl border-none shadow-md font-bold outline-none focus:ring-2 ring-indigo-400 text-base">
+                <button onclick="window.searchAndShowDirections()" class="bg-indigo-500 text-white px-6 rounded-2xl active:scale-95 transition-transform"><i class="fa-solid fa-magnifying-glass"></i></button>
             </div>
-            <div id="map-container" class="h-[60vh] bg-white rounded-[2rem] card overflow-hidden flex items-center justify-center text-slate-300 italic text-sm p-2">
+            <a href="https://maps.app.goo.gl/5tGkwrr5Ejc9s4yQA" target="_blank" class="w-full bg-slate-900 text-white p-5 rounded-2xl flex items-center justify-center gap-3 shadow-lg mb-6">
+                <span class="text-xl">😋</span>
+                <span class="text-sm font-black italic uppercase tracking-wider">開啟美食清單 (Google Maps)</span>
+            </a>
+            <div id="map-container" class="h-[50vh] bg-white rounded-[2.5rem] card overflow-hidden flex items-center justify-center text-slate-300 italic text-base p-4">
                 <p>請輸入目的地搜尋地圖</p>
             </div>
         </div>
         
         <div id="page-documents" class="page">
-            <div class="flex justify-between items-center mb-5"><h2 class="text-xl font-black italic">共享文件</h2><button onclick="window.triggerUpload()" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-[9px] font-black italic">上傳</button></div>
-            <div id="documents-list" class="space-y-3"></div>
+            <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-black italic">共享文件</h2><button onclick="window.triggerUpload()" class="bg-slate-900 text-white px-5 py-3 rounded-2xl text-[11px] font-black italic">上傳</button></div>
+            <div id="documents-list" class="space-y-4"></div>
             <input type="file" id="file-input" class="hidden" onchange="window.handleFileSelect(event)">
         </div>
     </div>
 
-    <div class="fixed bottom-6 left-4 right-4 bg-white/95 backdrop-blur-xl border border-white/20 rounded-[2.2rem] max-w-2xl mx-auto z-50 shadow-2xl">
-        <div class="grid grid-cols-5 text-center py-4">
-            <div onclick="window.navigateTo('home')" class="nav-item active flex flex-col items-center"><i class="fa-solid fa-house text-base"></i><span class="text-[8px] mt-1 font-black uppercase">Home</span></div>
-            <div onclick="window.navigateTo('itinerary')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-route text-base"></i><span class="text-[8px] mt-1 font-black uppercase">Plan</span></div>
-            <div onclick="window.navigateTo('expenses')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-receipt text-base"></i><span class="text-[8px] mt-1 font-black uppercase">Spend</span></div>
-            <div onclick="window.navigateTo('map')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-map text-base"></i><span class="text-[8px] mt-1 font-black uppercase">Map</span></div>
-            <div onclick="window.navigateTo('documents')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-folder text-base"></i><span class="text-[8px] mt-1 font-black uppercase">Docs</span></div>
+    <div class="fixed bottom-6 left-4 right-4 bg-white/95 backdrop-blur-xl border border-white/20 rounded-[2.5rem] max-w-2xl mx-auto z-50 shadow-2xl">
+        <div class="grid grid-cols-5 text-center py-5">
+            <div onclick="window.navigateTo('home')" class="nav-item active flex flex-col items-center"><i class="fa-solid fa-house text-lg"></i><span class="text-[9px] mt-1.5 font-black uppercase">Home</span></div>
+            <div onclick="window.navigateTo('itinerary')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-route text-lg"></i><span class="text-[9px] mt-1.5 font-black uppercase">Plan</span></div>
+            <div onclick="window.navigateTo('expenses')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-receipt text-lg"></i><span class="text-[9px] mt-1.5 font-black uppercase">Spend</span></div>
+            <div onclick="window.navigateTo('map')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-map text-lg"></i><span class="text-[9px] mt-1.5 font-black uppercase">Map</span></div>
+            <div onclick="window.navigateTo('documents')" class="nav-item flex flex-col items-center"><i class="fa-solid fa-folder text-lg"></i><span class="text-[9px] mt-1.5 font-black uppercase">Docs</span></div>
         </div>
     </div>
 
     <div id="modal-updates" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] px-6">
-        <div class="bg-white w-full max-w-md rounded-[2rem] p-7">
-            <h3 class="text-lg font-black mb-4 italic">最新動態 🔔</h3>
-            <div class="space-y-3 mb-6">
-                <div class="p-3 bg-slate-50 rounded-xl text-[10px] font-bold italic border-l-4 border-indigo-500 uppercase">更新：簡化「還錢」項目的顯示內容。</div>
-            </div>
-            <button onclick="window.hideModals()" class="w-full py-3.5 bg-gray-900 text-white rounded-xl font-black italic text-sm">知道了</button>
+        <div class="bg-white w-full max-w-md rounded-[2.5rem] p-8 overflow-y-auto max-h-[80vh]">
+            <h3 class="text-xl font-black mb-5 italic">最新動態 🔔</h3>
+            <div id="update-log-container" class="space-y-4 mb-6"></div>
+            <button onclick="window.hideModals(); document.getElementById('update-dot').classList.add('hidden')" class="w-full py-4 bg-gray-900 text-white rounded-2xl font-black italic text-base">關閉</button>
         </div>
     </div>
 
     <div id="modal-payback" class="hidden fixed inset-0 bg-black/80 flex items-end z-[9999]">
-        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2rem] p-8">
-            <h3 class="text-lg font-black mb-5 italic text-indigo-500 uppercase">還錢轉帳</h3>
-            <div class="grid grid-cols-2 gap-3 mb-3">
-                <div><label class="text-[10px] font-black text-slate-400 mb-1 block uppercase">邊個還錢？</label><select id="payback-from" class="w-full p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm"></select></div>
-                <div><label class="text-[10px] font-black text-slate-400 mb-1 block uppercase">還俾邊個？</label><select id="payback-to" class="w-full p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm"></select></div>
+        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2.5rem] p-9">
+            <h3 class="text-xl font-black mb-6 italic text-indigo-500 uppercase">費用轉帳 / 結算</h3>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div><label class="text-[11px] font-black text-slate-400 mb-1.5 block uppercase">邊個轉帳？</label><select id="payback-from" class="w-full p-4 rounded-2xl bg-slate-100 font-bold border-none outline-none text-base"></select></div>
+                <div><label class="text-[11px] font-black text-slate-400 mb-1.5 block uppercase">轉俾邊個？</label><select id="payback-to" class="w-full p-4 rounded-2xl bg-slate-100 font-bold border-none outline-none text-base"></select></div>
             </div>
-            <div class="grid grid-cols-2 gap-3 mb-5">
-                <input id="payback-amount" type="number" placeholder="金額" class="p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm">
-                <select id="payback-currency" class="p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm"><option value="THB">฿ THB</option><option value="HKD">$ HKD</option></select>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <input id="payback-amount" type="number" placeholder="金額" class="p-4 rounded-2xl bg-slate-100 font-bold border-none outline-none text-base">
+                <select id="payback-currency" class="p-4 rounded-2xl bg-slate-100 font-bold border-none outline-none text-base"><option value="THB">฿ THB</option><option value="HKD">$ HKD</option></select>
             </div>
-            <div class="flex gap-3">
-                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic text-sm">取消</button>
-                <button onclick="window.savePayback()" class="flex-[2] py-4 bg-indigo-500 text-white rounded-xl font-black italic shadow-lg text-sm">完成還錢</button>
+            <div class="flex gap-4">
+                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic text-base">✖️ 取消</button>
+                <button onclick="window.savePayback()" class="flex-[2] py-4 bg-indigo-500 text-white rounded-2xl font-black italic shadow-lg text-base">確認轉帳</button>
             </div>
         </div>
     </div>
 
     <div id="modal-itinerary" class="hidden fixed inset-0 bg-black/80 flex items-end z-[9999]">
-        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2rem] p-8 overflow-y-auto max-h-[92vh]">
-            <h3 id="modal-itinerary-title" class="text-lg font-black italic mb-5">更新行程事項</h3>
-            <select id="act-date" onchange="window.toggleTimeFields()" class="w-full mb-3 p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm">
-                <option value="Pre">Pre-trip 備忘</option><option value="24">24/6</option><option value="25">25/6</option><option value="26">26/6</option><option value="27">27/6</option><option value="28">28/6</option><option value="29">29/6</option><option value="30">30/6</option>
+        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2.5rem] p-9 overflow-y-auto max-h-[92vh]">
+            <h3 id="modal-itinerary-title" class="text-xl font-black italic mb-6">更新行程事項</h3>
+            <select id="act-date" onchange="window.toggleTimeFields()" class="w-full mb-4 p-4 rounded-2xl bg-slate-100 font-bold border-none outline-none text-base">
+                <option value="Pre">Pre-trip 備忘</option><option value="24">24/6</option><option value="25">25/6</option><option value="26">26/6</option><option value="27">27/6</option><option value="28">28/6</option><option value="29">29/6</option><option value="30">30/6</option><option value="01">01/7</option>
             </select>
-            <div id="time-selector" class="flex gap-2 items-center mb-3">
-                <select id="act-hour" class="flex-1 p-4 rounded-xl bg-slate-100 font-black text-center border-none outline-none text-sm"></select>
+            <div id="time-selector" class="flex gap-3 items-center mb-4">
+                <select id="act-hour" class="flex-1 p-4 rounded-2xl bg-slate-100 font-black text-center border-none outline-none text-base"></select>
                 <span class="font-black text-indigo-500">:</span>
-                <select id="act-min" class="flex-1 p-4 rounded-xl bg-slate-100 font-black text-center border-none outline-none text-sm"></select>
+                <select id="act-min" class="flex-1 p-4 rounded-2xl bg-slate-100 font-black text-center border-none outline-none text-base"></select>
             </div>
-            <input id="act-title" type="text" placeholder="事項名稱" class="w-full mb-3 p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm">
-            <textarea id="act-remark" placeholder="備註..." class="w-full p-4 rounded-xl bg-slate-100 h-24 font-bold border-none outline-none mb-6 text-sm"></textarea>
-            <div class="flex gap-3">
-                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic text-sm">返回</button>
-                <button id="delete-btn" onclick="window.deleteItinerary()" class="hidden flex-1 py-4 text-rose-500 font-bold italic text-sm">刪除</button>
-                <button onclick="window.saveItinerary()" class="flex-[2] py-4 bg-indigo-500 text-white rounded-xl font-black italic shadow-lg text-sm">儲存</button>
+            <input id="act-title" type="text" placeholder="事項名稱" class="w-full mb-4 p-4 rounded-2xl bg-slate-100 font-bold border-none outline-none text-base">
+            <textarea id="act-remark" placeholder="備註..." class="w-full p-4 rounded-2xl bg-slate-100 h-32 font-bold border-none outline-none mb-8 text-base"></textarea>
+            <div class="flex gap-4">
+                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic text-base">✖️ 取消</button>
+                <button id="delete-btn" onclick="window.deleteItinerary()" class="hidden flex-1 py-4 text-rose-500 font-bold italic text-base">🗑️ 刪除</button>
+                <button onclick="window.saveItinerary()" class="flex-[2] py-4 bg-indigo-500 text-white rounded-2xl font-black italic shadow-lg text-base">儲存</button>
             </div>
         </div>
     </div>
 
     <div id="modal-expense" class="hidden fixed inset-0 bg-black/80 flex items-end z-[9999]">
-        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2rem] p-8">
-            <h3 class="text-lg font-black mb-5 italic text-emerald-500 uppercase">新增開支</h3>
-            <input id="exp-desc" type="text" placeholder="項目名稱" class="w-full p-4 rounded-xl bg-slate-100 mb-3 font-bold border-none outline-none text-sm">
-            <div class="grid grid-cols-2 gap-3 mb-3">
-                <input id="exp-amount" type="number" placeholder="金額" class="p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm">
-                <select id="exp-currency" class="p-4 rounded-xl bg-slate-100 font-bold border-none outline-none text-sm"><option value="THB">฿ THB</option><option value="HKD">$ HKD</option></select>
+        <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2.5rem] p-9">
+            <h3 class="text-xl font-black mb-6 italic text-emerald-500 uppercase">新增開支</h3>
+            <input id="exp-desc" type="text" placeholder="項目名稱" class="w-full p-5 rounded-2xl bg-slate-100 mb-4 font-bold border-none outline-none text-base">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <input id="exp-amount" type="number" placeholder="金額" class="p-5 rounded-2xl bg-slate-100 font-bold border-none outline-none text-base">
+                <select id="exp-currency" class="p-5 rounded-2xl bg-slate-100 font-bold border-none outline-none text-base"><option value="THB">฿ THB</option><option value="HKD">$ HKD</option></select>
             </div>
-            <select id="exp-paidby" class="w-full p-4 rounded-xl bg-slate-100 mb-5 font-bold border-none outline-none text-sm"></select>
-            <div id="split-members" class="flex flex-wrap gap-2 mb-6"></div>
-            <div class="flex gap-3">
-                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic text-sm">返回</button>
-                <button onclick="window.saveExpense()" class="flex-[2] py-4 bg-emerald-500 text-white rounded-xl font-black italic shadow-lg text-sm">確認記帳</button>
+            <select id="exp-paidby" class="w-full p-5 rounded-2xl bg-slate-100 mb-6 font-bold border-none outline-none text-base"></select>
+            <div id="split-members" class="flex flex-wrap gap-2.5 mb-8"></div>
+            <div class="flex gap-4">
+                <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic text-base">✖️ 取消</button>
+                <button onclick="window.saveExpense()" class="flex-[2] py-4 bg-emerald-500 text-white rounded-2xl font-black italic shadow-lg text-base">確認記帳</button>
             </div>
         </div>
     </div>
@@ -254,20 +298,22 @@
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         client.channel('realtime_sync')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'itinerary' }, () => fetchData())
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => fetchData())
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'documents' }, () => fetchData())
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'itinerary' }, () => { fetchData(); showNotification(); })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses' }, () => { fetchData(); showNotification(); })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'documents' }, () => { fetchData(); showNotification(); })
             .subscribe();
 
         async function fetchData() {
             const { data: itin } = await client.from('itinerary').select('*');
-            const { data: exp } = await client.from('expenses').select('*');
+            const { data: exp } = await client.from('expenses').select('*').order('created_at', { ascending: false });
             const { data: docs } = await client.from('documents').select('*');
             if (itin) demoItinerary = itin;
             if (exp) demoExpenses = exp;
             if (docs) demoDocs = docs;
-            renderItinerary(); renderExpenses(); renderDocs();
+            renderItinerary(); renderExpenses(); renderDocs(); updateBellLog();
         }
+
+        function showNotification() { document.getElementById('update-dot').classList.remove('hidden'); }
 
         window.onload = () => { initDateBar(); initTimeSelectors(); fetchData(); window.navigateTo('home'); };
 
@@ -276,7 +322,7 @@
             const emoji = document.createElement("div");
             emoji.innerText = emojis[Math.floor(Math.random() * emojis.length)];
             emoji.style.position = "absolute"; emoji.style.left = e.pageX + "px"; emoji.style.top = e.pageY + "px";
-            emoji.style.fontSize = "24px"; emoji.style.pointerEvents = "none"; emoji.style.zIndex = "1000";
+            emoji.style.fontSize = "30px"; emoji.style.pointerEvents = "none"; emoji.style.zIndex = "1000";
             document.body.appendChild(emoji);
             let pos = 0;
             let id = setInterval(() => {
@@ -286,11 +332,11 @@
         };
 
         function initDateBar() {
-            const dates = ["Pre", "24", "25", "26", "27", "28", "29", "30"];
+            const dates = ["Pre", "24", "25", "26", "27", "28", "29", "30", "01"];
             document.getElementById('calendar-strip').innerHTML = dates.map(d => `
-                <div onclick="window.filterDate('${d}')" id="date-${d}" class="date-chip flex flex-col items-center justify-center bg-white card cursor-pointer ${d === selectedDate ? 'active' : ''}">
-                    <span class="text-[8px] font-black opacity-40 uppercase text-center">${d === 'Pre' ? 'List' : 'JUNE'}</span>
-                    <span class="text-lg font-black italic">${d === 'Pre' ? '備忘' : d}</span>
+                <div onclick="window.filterDate('${d}')" id="date-${d}" class="date-chip bg-white card cursor-pointer ${d === selectedDate ? 'active' : ''}">
+                    <span class="text-[9px] font-black opacity-40 uppercase text-center">${d === 'Pre' ? 'List' : (d === '01' ? 'JULY' : 'JUNE')}</span>
+                    <span class="text-xl font-black italic">${d === 'Pre' ? '備忘' : d}</span>
                 </div>`).join('');
         }
 
@@ -313,7 +359,7 @@
             selectedDate = d;
             document.querySelectorAll('.date-chip').forEach(el => el.classList.remove('active'));
             const target = document.getElementById(`date-${d}`); if(target) target.classList.add('active');
-            document.getElementById('current-view-date').textContent = d === 'Pre' ? 'Pre-trip 備忘' : `6月${d}日 行程`;
+            document.getElementById('current-view-date').textContent = d === 'Pre' ? 'Pre-trip 備忘' : (d === '01' ? `7月1日 行程` : `6月${d}日 行程`);
             renderItinerary();
         };
 
@@ -324,19 +370,19 @@
             let f = demoItinerary.filter(i => i.date === selectedDate);
             if(isPre) { f.sort((a,b) => (a.checked === b.checked) ? 0 : a.checked ? 1 : -1); wrapper.classList.add('is-pre-trip'); } 
             else { f.sort((a,b) => (a.time || "").localeCompare(b.time || "")); wrapper.classList.remove('is-pre-trip'); }
-            if(f.length === 0) { container.innerHTML = `<div class="text-center py-20 text-slate-300 font-black italic">暫時無紀錄</div>`; return; }
+            if(f.length === 0) { container.innerHTML = `<div class="text-center py-24 text-slate-300 font-black italic text-lg">暫時無紀錄</div>`; return; }
             container.innerHTML = f.map((item, idx) => `
                 <div onclick="window.editItinerary(${item.id})" class="itin-card card">
                     <div class="flex justify-between items-start">
                         <div class="flex-1">
-                            <div class="flex items-center gap-3 mb-2">
+                            <div class="flex items-center gap-4 mb-3">
                                 <div onclick="event.stopPropagation(); window.toggleCheck(${item.id})" class="tick-box ${item.checked ? 'checked' : ''}">
-                                    <i class="fa-solid fa-check text-white text-xs ${item.checked ? '' : 'hidden'}"></i>
+                                    <i class="fa-solid fa-check text-white text-sm ${item.checked ? '' : 'hidden'}"></i>
                                 </div>
                                 ${!isPre && item.time ? `<span class="time-bubble">${item.time}</span>` : ''}
                             </div>
-                            <div class="font-black text-base text-slate-800 leading-tight ${item.checked ? 'completed-text' : ''}">${item.title}</div>
-                            ${item.remark ? `<div class="bg-slate-50 p-3 rounded-xl text-[10px] font-bold text-slate-500 italic mt-2">${item.remark}</div>` : ''}
+                            <div class="font-black text-lg text-slate-800 leading-tight ${item.checked ? 'completed-text' : ''}">${item.title}</div>
+                            ${item.remark ? `<div class="bg-slate-50 p-4 rounded-2xl text-[12px] font-bold text-slate-500 italic mt-3">${item.remark}</div>` : ''}
                         </div>
                     </div>
                 </div>`).join('');
@@ -383,7 +429,7 @@
         window.showAddExpenseModal = () => {
             document.getElementById('exp-desc').value = ""; document.getElementById('exp-amount').value = "";
             document.getElementById('exp-paidby').innerHTML = groupMembers.map(m => `<option value="${m}">${m}</option>`).join('');
-            document.getElementById('split-members').innerHTML = groupMembers.map(m => `<label class="flex items-center gap-2 bg-slate-100 px-3 py-2 rounded-xl text-[9px] font-bold"><input type="checkbox" value="${m}" checked> ${m}</label>`).join('');
+            document.getElementById('split-members').innerHTML = groupMembers.map(m => `<label class="flex items-center gap-2.5 bg-slate-100 px-4 py-3 rounded-2xl text-[11px] font-bold"><input type="checkbox" value="${m}" checked> ${m}</label>`).join('');
             document.getElementById('modal-expense').classList.remove('hidden');
         };
 
@@ -408,11 +454,17 @@
             const to = document.getElementById('payback-to').value;
             const amount = parseFloat(document.getElementById('payback-amount').value) || 0;
             const currency = document.getElementById('payback-currency').value;
-            if(from === to) { alert("唔可以自己還錢比自己。"); return; }
             if(amount <= 0) return;
-            const paybackData = { id: Date.now(), desc: `💸 還錢: ${from} ➔ ${to}`, amount: amount, currency: currency, paid_by: from, split: [to] };
+            const paybackData = { id: Date.now(), desc: `💸 轉帳: ${from} ➔ ${to}`, amount: amount, currency: currency, paid_by: from, split: [to] };
             await client.from('expenses').insert(paybackData);
             window.hideModals(); fetchData();
+        };
+
+        window.resetExpenseData = async () => {
+            if(confirm("⚠️ 確定要「清空所有開支紀錄」嗎？\n此操作無法撤銷。")) {
+                await client.from('expenses').delete().neq('id', 0);
+                fetchData();
+            }
         };
 
         function renderExpenses() {
@@ -421,38 +473,54 @@
             let thbTotal = 0, hkdTotal = 0;
             
             container.innerHTML = demoExpenses.map(item => {
-                const isPayback = item.desc.includes('還錢:');
-                if(!isPayback) { if(item.currency === 'THB') thbTotal += item.amount; else hkdTotal += item.amount; }
+                const isTransfer = item.desc.includes('轉帳:');
+                if(!isTransfer) { if(item.currency === 'THB') thbTotal += item.amount; else hkdTotal += item.amount; }
                 const share = item.amount / item.split.length;
                 bal[item.paid_by][item.currency] += item.amount;
                 item.split.forEach(m => bal[m][item.currency] -= share);
                 
-                const currencyLabel = item.currency === 'THB' ? 'THB' : 'HKD';
                 const symbol = item.currency === 'THB' ? '฿' : '$';
                 return `
-                <div class="bg-white p-4 rounded-[1.5rem] card flex justify-between items-center ${isPayback ? 'border-l-4 border-l-indigo-400' : ''}">
+                <div class="bg-white p-5 rounded-[1.8rem] card flex justify-between items-center ${isTransfer ? 'border-l-4 border-l-indigo-400' : ''}">
                     <div>
-                        <div class="font-black text-slate-800 text-sm">${item.desc}</div>
-                        ${!isPayback ? `<div class="text-[8px] font-black text-indigo-400 italic uppercase tracking-wider">${item.paid_by} 俾咗</div>` : ''}
+                        <div class="font-black text-slate-800 text-base">${item.desc}</div>
+                        ${!isTransfer ? `<div class="text-[10px] font-black text-indigo-400 italic uppercase tracking-wider">${item.paid_by} 支付</div>` : ''}
                     </div>
                     <div class="text-right">
-                        <div class="text-base font-black italic">${symbol}${item.amount.toLocaleString()}</div>
-                        <div class="text-[8px] font-bold text-slate-300">${currencyLabel}</div>
+                        <div class="text-lg font-black italic">${symbol}${item.amount.toLocaleString()}</div>
                     </div>
                 </div>`;
             }).join('');
             
-            document.getElementById('total-spent-thb').textContent = `฿${thbTotal.toLocaleString()}`;
-            document.getElementById('total-spent-hkd').textContent = `$${hkdTotal.toLocaleString()}`;
+            document.getElementById('total-spent-thb').textContent = thbTotal.toLocaleString();
+            document.getElementById('total-spent-hkd').textContent = hkdTotal.toLocaleString();
+            
             document.getElementById('settlement-list').innerHTML = groupMembers.map(m => {
                 const t = bal[m].THB; const h = bal[m].HKD;
-                return `<div class="flex justify-between items-start border-b border-slate-50 pb-3 last:border-0"><span class="font-bold text-gray-700 text-xs italic">${m}</span><div class="text-right"><div class="font-black text-[10px] ${t>=0?'text-emerald-500':'text-rose-400'}">${t.toFixed(0)} THB</div><div class="font-black text-[9px] ${h>=0?'text-emerald-600':'text-rose-600'}">${h.toFixed(0)} HKD</div></div></div>`;
+                return `
+                <div class="flex justify-between items-center border-b border-slate-50 pb-4 last:border-0">
+                    <span class="font-black text-gray-700 text-sm italic uppercase">${m}</span>
+                    <div class="text-right">
+                        <div class="font-black text-[12px] ${t>=0?'text-blue-700':'text-rose-500'}">${t.toFixed(0)} <span class="opacity-60 text-blue-900">THB</span></div>
+                        <div class="font-black text-[11px] ${h>=0?'text-purple-700':'text-rose-600'}">${h.toFixed(0)} <span class="opacity-60 text-purple-900">HKD</span></div>
+                    </div>
+                </div>`;
             }).join('');
+        }
+
+        function updateBellLog() {
+            const container = document.getElementById('update-log-container');
+            let logs = [];
+            demoExpenses.slice(0, 5).forEach(e => logs.push({ text: `${e.desc} (由 ${e.paid_by} 記錄)`, time: e.created_at }));
+            demoItinerary.slice(0, 5).forEach(i => logs.push({ text: `行程更新: ${i.title}`, time: i.id }));
+            logs.sort((a,b) => b.time - a.time);
+            container.innerHTML = logs.slice(0, 5).map(l => `<div class="p-4 bg-slate-50 rounded-xl text-[11px] font-bold italic border-l-4 border-indigo-500 uppercase">${l.text}</div>`).join('') + 
+            `<div class="p-4 bg-rose-50 rounded-xl text-[11px] font-bold text-rose-600 border-l-4 border-rose-400 uppercase tracking-tighter">系統更新：介面字體已放大，配色已優化。</div>`;
         }
 
         window.searchAndShowDirections = () => {
             const q = document.getElementById('map-search').value; if(!q) return;
-            document.getElementById('map-container').innerHTML = `<div class="text-center p-10"><a href="https://www.google.com/maps/search/${encodeURIComponent(q)}" target="_blank" class="bg-slate-900 text-white px-6 py-3 rounded-xl font-black italic text-xs">喺 Google Maps 開啟位置</a></div>`;
+            document.getElementById('map-container').innerHTML = `<div class="text-center p-12"><a href="https://www.google.com/maps/search/${encodeURIComponent(q)}" target="_blank" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black italic text-sm">喺 Google Maps 開啟位置</a></div>`;
         };
 
         window.triggerUpload = () => document.getElementById('file-input').click();
@@ -465,9 +533,9 @@
 
         function renderDocs() {
             document.getElementById('documents-list').innerHTML = demoDocs.map(doc => `
-                <div class="bg-white p-4 rounded-[1.5rem] card flex items-center gap-3">
-                    <div class="bg-indigo-50 w-9 h-9 rounded-lg flex items-center justify-center text-indigo-500 text-xs"><i class="fa-solid fa-file"></i></div>
-                    <div><div class="text-xs font-black text-gray-800">${doc.name}</div><div class="text-[8px] font-bold text-slate-400 italic">${doc.date}</div></div>
+                <div class="bg-white p-5 rounded-[1.8rem] card flex items-center gap-4">
+                    <div class="bg-indigo-50 w-10 h-10 rounded-xl flex items-center justify-center text-indigo-500 text-sm"><i class="fa-solid fa-file"></i></div>
+                    <div><div class="text-sm font-black text-gray-800">${doc.name}</div><div class="text-[10px] font-bold text-slate-400 italic">${doc.date}</div></div>
                 </div>`).join('');
         }
 
