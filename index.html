@@ -129,11 +129,11 @@
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 mt-12 mb-8">
-                    <button onclick="window.quickAddExpense()" class="btn-pulse w-full bg-emerald-400 text-white p-7 rounded-[2rem] flex items-center justify-between shadow-lg">
+                    <button onclick="window.quickAddExpense()" class="btn-pulse w-full bg-indigo-500 text-white p-7 rounded-[2rem] flex items-center justify-between shadow-lg">
                         <div class="flex items-center gap-4"><div class="bg-white/20 w-11 h-11 rounded-xl flex items-center justify-center"><i class="fa-solid fa-receipt text-xl"></i></div><span class="font-black italic uppercase text-base">新增開支項目</span></div>
                         <i class="fa-solid fa-chevron-right opacity-50 text-sm"></i>
                     </button>
-                    <button onclick="window.quickAddPlan()" class="btn-pulse w-full bg-indigo-500 text-white p-7 rounded-[2rem] flex items-center justify-between shadow-lg">
+                    <button onclick="window.quickAddPlan()" class="btn-pulse w-full bg-amber-500 text-white p-7 rounded-[2rem] flex items-center justify-between shadow-lg">
                         <div class="flex items-center gap-4"><div class="bg-white/20 w-11 h-11 rounded-xl flex items-center justify-center"><i class="fa-solid fa-map-pin text-xl"></i></div><span class="font-black italic uppercase text-base">更新行程規劃</span></div>
                         <i class="fa-solid fa-chevron-right opacity-50 text-sm"></i>
                     </button>
@@ -159,22 +159,22 @@
         <div id="page-expenses" class="page">
             <div class="flex justify-between items-center mb-5 px-1">
                 <div class="flex gap-2">
-                    <button onclick="window.showAddExpenseModal()" class="bg-emerald-400 text-white px-5 py-3 rounded-2xl text-[11px] font-black italic shadow-md">➕ 記帳</button>
-                    <button onclick="window.showPaybackModal()" class="bg-indigo-100 text-indigo-600 px-5 py-3 rounded-2xl text-[11px] font-black italic">💸 轉帳</button>
+                    <button onclick="window.showAddExpenseModal()" class="bg-emerald-300 text-white px-5 py-3 rounded-2xl text-[12px] font-black italic shadow-md">➕ 記帳</button>
+                    <button onclick="window.showPaybackModal()" class="bg-indigo-100 text-indigo-600 px-5 py-3 rounded-2xl text-[12px] font-black italic">💸 轉帳</button>
                 </div>
-                <button onclick="window.resetExpenseData()" class="bg-rose-50 text-rose-500 px-4 py-3 rounded-2xl text-[11px] font-black italic border border-rose-100">🗑️ 清空</button>
+                <button onclick="window.resetExpenseData()" class="bg-rose-50 text-rose-500 px-4 py-3 rounded-2xl text-[12px] font-black italic border border-rose-100">🗑️ 清空</button>
             </div>
             
-            <div class="bg-gradient-to-br from-rose-400 to-pink-500 text-white rounded-[2.2rem] p-7 mb-6 shadow-xl italic">
+            <div class="bg-gradient-to-br from-rose-300 to-pink-400 text-white rounded-[2.2rem] p-7 mb-6 shadow-xl italic">
                 <div class="flex justify-between items-end">
                     <div>
-                        <span class="text-white/70 text-[10px] font-black tracking-widest uppercase">總計 THB</span>
+                        <span class="text-white/70 text-[11px] font-black tracking-widest uppercase">總計 THB</span>
                         <div class="flex items-baseline gap-1 mt-1">
-                            <span class="text-2xl font-black">฿</span><span id="total-spent-thb" class="text-4xl font-black">0</span>
+                            <span class="text-2xl font-black">฿</span><span id="total-spent-thb" class="text-2xl font-black">0</span>
                         </div>
                     </div>
                     <div class="text-right">
-                        <span class="text-white/70 text-[10px] font-black tracking-widest uppercase">總計 HKD</span>
+                        <span class="text-white/70 text-[11px] font-black tracking-widest uppercase">總計 HKD</span>
                         <div class="flex items-baseline gap-1 mt-1 justify-end">
                             <span class="text-lg font-black">$</span><span id="total-spent-hkd" class="text-2xl font-black">0</span>
                         </div>
@@ -183,7 +183,7 @@
             </div>
 
             <div id="expense-list" class="space-y-4 mb-8"></div>
-            <div id="settlement-list" class="bg-white rounded-[2rem] p-6 card space-y-4 border-t-4 border-t-emerald-400"></div>
+            <div id="settlement-list" class="bg-white rounded-[2rem] p-6 card space-y-4 border-t-4 border-t-indigo-400"></div>
         </div>
 
         <div id="page-map" class="page">
@@ -203,7 +203,7 @@
         </div>
         
         <div id="page-documents" class="page">
-            <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-black italic">共享文件</h2><button onclick="window.triggerUpload()" class="bg-slate-900 text-white px-5 py-3 rounded-2xl text-[11px] font-black italic">上傳</button></div>
+            <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-black italic">共享文件</h2><button onclick="window.triggerUpload()" class="bg-amber-400 text-white px-5 py-3 rounded-2xl text-[12px] font-black italic">上傳</button></div>
             <div id="documents-list" class="space-y-4"></div>
             <input type="file" id="file-input" class="hidden" onchange="window.handleFileSelect(event)">
         </div>
@@ -268,7 +268,7 @@
 
     <div id="modal-expense" class="hidden fixed inset-0 bg-black/80 flex items-end z-[9999]">
         <div class="bg-white w-full max-w-2xl mx-auto rounded-t-[2.5rem] p-9">
-            <h3 class="text-xl font-black mb-6 italic text-emerald-400 uppercase">新增開支</h3>
+            <h3 class="text-xl font-black mb-6 italic text-indigo-500 uppercase">新增開支</h3>
             <input id="exp-desc" type="text" placeholder="項目名稱" class="w-full p-5 rounded-2xl bg-slate-100 mb-4 font-bold border-none outline-none text-base">
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <input id="exp-amount" type="number" placeholder="金額" class="p-5 rounded-2xl bg-slate-100 font-bold border-none outline-none text-base">
@@ -278,7 +278,7 @@
             <div id="split-members" class="flex flex-wrap gap-2.5 mb-8"></div>
             <div class="flex gap-4">
                 <button onclick="window.hideModals()" class="flex-1 py-4 text-slate-400 font-bold italic text-base">✖️ 取消</button>
-                <button onclick="window.saveExpense()" class="flex-[2] py-4 bg-emerald-400 text-white rounded-2xl font-black italic shadow-lg text-base">確認記帳</button>
+                <button onclick="window.saveExpense()" class="flex-[2] py-4 bg-emerald-500 text-white rounded-2xl font-black italic shadow-lg text-base">確認記帳</button>
             </div>
         </div>
     </div>
@@ -514,7 +514,7 @@
             demoItinerary.slice(0, 5).forEach(i => logs.push({ text: `行程更新: ${i.title}`, time: i.id }));
             logs.sort((a,b) => b.time - a.time);
             container.innerHTML = logs.slice(0, 5).map(l => `<div class="p-4 bg-slate-50 rounded-xl text-[11px] font-bold italic border-l-4 border-indigo-500 uppercase">${l.text}</div>`).join('') + 
-            `<div class="p-4 bg-rose-50 rounded-xl text-[11px] font-bold text-rose-600 border-l-4 border-rose-400 uppercase tracking-tighter">系統更新：介面字體已放大，配色已優化。</div>`;
+            `<div class="p-4 bg-rose-50 rounded-xl text-[11px] font-bold text-rose-600 border-l-4 border-rose-400 uppercase tracking-tighter">系統更新：介面配色優化，按鈕功能更易區分。</div>`;
         }
 
         window.searchAndShowDirections = () => {
