@@ -183,6 +183,7 @@
             </div>
 
             <div id="expense-list" class="space-y-4 mb-8"></div>
+            <div class="mb-2 px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">點擊名稱查看詳情</div>
             <div id="settlement-list" class="bg-white rounded-[2rem] p-6 card space-y-4 border-t-4 border-t-indigo-400"></div>
         </div>
 
@@ -435,10 +436,13 @@
         window.saveExpense = async () => {
             const amount = parseFloat(document.getElementById('exp-amount').value) || 0;
             const split = Array.from(document.querySelectorAll('#split-members input:checked')).map(cb => cb.value);
-            const desc = document.getElementById('exp-desc').value;
-            if(amount <= 0 || !split.length || !desc) return;
-            await client.from('expenses').insert({ id: Date.now(), desc, amount, currency: document.getElementById('exp-currency').value, paid_by: document.getElementById('exp-paidby').value, split });
-            window.hideModals(); fetchData();
+            const description = document.getElementById('exp-desc').value;
+            const currency = document.getElementById('exp-currency').value;
+            const payer = document.getElementById('exp-paidby').value;
+            if(amount <= 0 || !split.length || !description) { alert("請填寫所有欄位！"); return; }
+            const { error } = await client.from('expenses').insert({ description, amount, currency, payer, participants: split });
+            if (error) { console.error("Save error:", error); alert("Fail to save: " + error.message); } 
+            else { window.hideModals(); await fetchData(); }
         };
 
         window.showPaybackModal = () => {
@@ -454,9 +458,8 @@
             const amount = parseFloat(document.getElementById('payback-amount').value) || 0;
             const currency = document.getElementById('payback-currency').value;
             if(amount <= 0) return;
-            const paybackData = { id: Date.now(), desc: `💸 轉帳: ${from} ➔ ${to}`, amount: amount, currency: currency, paid_by: from, split: [to] };
-            await client.from('expenses').insert(paybackData);
-            window.hideModals(); fetchData();
+            const { error } = await client.from('expenses').insert({ description: `💸 轉帳: ${from} ➔ ${to}`, amount, currency, payer: from, participants: [to] });
+            if (error) { alert("Fail to save: " + error.message); } else { window.hideModals(); await fetchData(); }
         };
 
         window.resetExpenseData = async () => {
@@ -471,34 +474,36 @@
             const bal = {}; groupMembers.forEach(m => bal[m] = {THB: 0, HKD: 0});
             let thbTotal = 0, hkdTotal = 0;
             
-            container.innerHTML = demoExpenses.map(item => {
-                const isTransfer = item.desc.includes('轉帳:');
-                if(!isTransfer) { if(item.currency === 'THB') thbTotal += item.amount; else hkdTotal += item.amount; }
-                const share = item.amount / item.split.length;
-                bal[item.paid_by][item.currency] += item.amount;
-                item.split.forEach(m => bal[m][item.currency] -= share);
-                
-                const symbol = item.currency === 'THB' ? '฿' : '$';
-                return `
-                <div class="bg-white p-5 rounded-[1.8rem] card flex justify-between items-center ${isTransfer ? 'border-l-4 border-l-indigo-400' : ''}">
-                    <div>
-                        <div class="font-black text-slate-800 text-base">${item.desc}</div>
-                        ${!isTransfer ? `<div class="text-[10px] font-black text-indigo-400 italic uppercase tracking-wider">${item.paid_by} 支付</div>` : ''}
-                    </div>
-                    <div class="text-right">
-                        <div class="text-lg font-black italic">${symbol}${item.amount.toLocaleString()}</div>
-                    </div>
-                </div>`;
-            }).join('');
-            
-            document.getElementById('total-spent-thb').textContent = thbTotal.toLocaleString();
-            document.getElementById('total-spent-hkd').textContent = hkdTotal.toLocaleString();
+            if (!demoExpenses || demoExpenses.length === 0) {
+                container.innerHTML = `<div class="text-center py-24 text-slate-300 font-black italic text-lg">暫時無開支紀錄</div>`;
+                document.getElementById('total-spent-thb').textContent = "0";
+                document.getElementById('total-spent-hkd').textContent = "0";
+            } else {
+                container.innerHTML = demoExpenses.map(item => {
+                    const desc = item.description || item.desc || "無名稱";
+                    const payerName = item.payer || item.paid_by || "未知";
+                    const participantsList = item.participants || item.split || [];
+                    const isTransfer = desc.includes('轉帳:');
+                    if(!isTransfer) { if(item.currency === 'THB') thbTotal += item.amount; else hkdTotal += item.amount; }
+                    const share = item.amount / (participantsList.length || 1);
+                    if (bal[payerName]) bal[payerName][item.currency] += item.amount;
+                    participantsList.forEach(m => { if(bal[m]) bal[m][item.currency] -= share; });
+                    const symbol = item.currency === 'THB' ? '฿' : '$';
+                    return `
+                    <div class="bg-white p-5 rounded-[1.8rem] card flex justify-between items-center ${isTransfer ? 'border-l-4 border-l-indigo-400' : ''}">
+                        <div><div class="font-black text-slate-800 text-base">${desc}</div>${!isTransfer ? `<div class="text-[10px] font-black text-indigo-400 italic uppercase tracking-wider">${payerName} 支付</div>` : ''}</div>
+                        <div class="text-right"><div class="text-lg font-black italic">${symbol}${item.amount.toLocaleString()}</div></div>
+                    </div>`;
+                }).join('');
+                document.getElementById('total-spent-thb').textContent = Math.round(thbTotal).toLocaleString();
+                document.getElementById('total-spent-hkd').textContent = Math.round(hkdTotal).toLocaleString();
+            }
             
             document.getElementById('settlement-list').innerHTML = groupMembers.map(m => {
                 const t = bal[m].THB; const h = bal[m].HKD;
                 return `
-                <div class="flex justify-between items-center border-b border-slate-50 pb-4 last:border-0">
-                    <span class="font-black text-gray-700 text-sm italic uppercase">${m}</span>
+                <div onclick="window.showMemberDetail('${m}')" class="flex justify-between items-center border-b border-slate-50 pb-4 last:border-0 cursor-pointer active:bg-slate-50 transition-colors">
+                    <span class="font-black text-gray-700 text-sm italic uppercase underline decoration-indigo-200 underline-offset-4">${m}</span>
                     <div class="text-right">
                         <div class="font-black text-[12px] ${t>=0?'text-blue-700':'text-rose-500'}">${t.toFixed(0)} <span class="opacity-60 text-blue-900">THB</span></div>
                         <div class="font-black text-[11px] ${h>=0?'text-purple-700':'text-rose-600'}">${h.toFixed(0)} <span class="opacity-60 text-purple-900">HKD</span></div>
@@ -507,14 +512,55 @@
             }).join('');
         }
 
+        window.showMemberDetail = (name) => {
+            const matrix = {}; 
+            groupMembers.forEach(m1 => { 
+                matrix[m1] = {}; 
+                groupMembers.forEach(m2 => matrix[m1][m2] = { THB: 0, HKD: 0 });
+            });
+
+            demoExpenses.forEach(exp => {
+                const payer = exp.payer;
+                const participants = exp.participants || [];
+                const share = exp.amount / (participants.length || 1);
+                const cur = exp.currency;
+                participants.forEach(p => {
+                    if(p !== payer) {
+                        matrix[p][payer][cur] += share;
+                    }
+                });
+            });
+
+            let owes = []; let owed = [];
+            groupMembers.forEach(other => {
+                if(other === name) return;
+                // What 'name' owes to 'other'
+                const tOwe = matrix[name][other].THB - matrix[other][name].THB;
+                const hOwe = matrix[name][other].HKD - matrix[other][name].HKD;
+                if(tOwe > 1) owes.push(`${other}: ฿${Math.round(tOwe)}`);
+                if(hOwe > 1) owes.push(`${other}: $${Math.round(hOwe)}`);
+                if(tOwe < -1) owed.push(`${other}: ฿${Math.round(Math.abs(tOwe))}`);
+                if(hOwe < -1) owed.push(`${other}: $${Math.round(Math.abs(hOwe))}`);
+            });
+
+            let msg = `👤 ${name.toUpperCase()} 清單\n\n`;
+            msg += `🔴 應付 (Owes to others):\n${owes.length ? owes.join('\n') : '無債一身輕'}\n\n`;
+            msg += `🟢 應收 (Others owe ${name}):\n${owed.length ? owed.join('\n') : '暫無收款'}`;
+            alert(msg);
+        };
+
         function updateBellLog() {
             const container = document.getElementById('update-log-container');
             let logs = [];
-            demoExpenses.slice(0, 5).forEach(e => logs.push({ text: `${e.desc} (由 ${e.paid_by} 記錄)`, time: e.created_at }));
-            demoItinerary.slice(0, 5).forEach(i => logs.push({ text: `行程更新: ${i.title}`, time: i.id }));
+            if (demoExpenses) demoExpenses.slice(0, 5).forEach(e => {
+                const d = e.description || e.desc || "開支";
+                const p = e.payer || e.paid_by || "有人";
+                logs.push({ text: `${d} (由 ${p} 記錄)`, time: new Date(e.created_at || Date.now()).getTime() });
+            });
+            if (demoItinerary) demoItinerary.slice(0, 5).forEach(i => logs.push({ text: `行程更新: ${i.title}`, time: i.id }));
             logs.sort((a,b) => b.time - a.time);
             container.innerHTML = logs.slice(0, 5).map(l => `<div class="p-4 bg-slate-50 rounded-xl text-[11px] font-bold italic border-l-4 border-indigo-500 uppercase">${l.text}</div>`).join('') + 
-            `<div class="p-4 bg-rose-50 rounded-xl text-[11px] font-bold text-rose-600 border-l-4 border-rose-400 uppercase tracking-tighter">系統更新：介面配色優化，按鈕功能更易區分。</div>`;
+            `<div class="p-4 bg-rose-50 rounded-xl text-[11px] font-bold text-rose-600 border-l-4 border-rose-400 uppercase tracking-tighter">系統更新：新增債務明細查看功能。</div>`;
         }
 
         window.searchAndShowDirections = () => {
