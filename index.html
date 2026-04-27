@@ -188,20 +188,41 @@
         </div>
 
         <div id="page-map" class="page">
-            <div class="relative mb-4">
-                <input id="map-search" type="text" placeholder="想去邊度？" class="w-full px-6 py-4 pr-16 rounded-2xl border-none shadow-md font-bold outline-none focus:ring-2 ring-indigo-400 text-base">
-                <button onclick="window.searchAndShowDirections()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-indigo-500 text-white w-12 h-12 rounded-xl active:scale-95 transition-transform flex items-center justify-center">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </button>
+    <div class="relative mb-4">
+        <input id="map-search" type="text" placeholder="想去邊度？ (例如: 曼谷大皇宮)" class="w-full px-6 py-4 pr-16 rounded-2xl border-none shadow-md font-bold outline-none focus:ring-2 ring-indigo-400 text-base">
+        <button onclick="window.searchAndShowDirections()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-indigo-500 text-white w-12 h-12 rounded-xl active:scale-95 transition-transform flex items-center justify-center">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+    </div>
+
+    <div id="map-container" class="h-[45vh] bg-white rounded-[2.5rem] card overflow-hidden flex items-center justify-center text-slate-300 italic text-sm p-4 mb-6 relative">
+        <p id="map-placeholder">請輸入目的地搜尋地圖</p>
+        <iframe id="google-map-iframe" class="hidden w-full h-full border-0" allowfullscreen></iframe>
+    </div>
+
+    <div id="nearby-food-container" class="hidden mb-6 animate-fadeIn">
+        <button onclick="window.searchNearbyFood()" class="w-full bg-emerald-500 text-white p-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg active:scale-95 transition-transform">
+            <i class="fa-solid fa-utensils"></i>
+            <span class="font-black italic uppercase tracking-wider text-sm">搜尋附近必食餐廳</span>
+        </button>
+    </div>
+
+    <div class="mb-2 px-1 flex justify-between items-end">
+        <h3 class="text-lg font-black italic text-gray-800 uppercase">我的儲存清單</h3>
+    </div>
+    <a href="https://maps.app.goo.gl/Hfm2i6feL9SmdaqU9" target="_blank" class="w-full bg-slate-900 text-white p-6 rounded-[2rem] flex items-center justify-between shadow-xl active:scale-[0.98] transition-all group">
+        <div class="flex items-center gap-4">
+            <div class="bg-amber-400 w-12 h-12 rounded-2xl flex items-center justify-center text-slate-900 text-xl shadow-inner">
+                <i class="fa-solid fa-star"></i>
             </div>
-            <a href="https://maps.app.goo.gl/5tGkwrr5Ejc9s4yQA" target="_blank" class="w-full bg-slate-900 text-white p-5 rounded-2xl flex items-center justify-center gap-3 shadow-lg mb-6">
-                <span class="text-xl">😋</span>
-                <span class="text-sm font-black italic uppercase tracking-wider">開啟美食清單 (Google Maps)</span>
-            </a>
-            <div id="map-container" class="h-[50vh] bg-white rounded-[2.5rem] card overflow-hidden flex items-center justify-center text-slate-300 italic text-base p-4">
-                <p>請輸入目的地搜尋地圖</p>
+            <div>
+                <div class="text-sm font-black italic uppercase tracking-wider">美食地圖全集</div>
+                <div class="text-[10px] font-bold text-slate-400 opacity-80 uppercase tracking-tighter">Google Maps Saved List</div>
             </div>
         </div>
+        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:translate-x-1 transition-transform"></i>
+    </a>
+</div>
         
         <div id="page-documents" class="page">
             <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-black italic">共享文件</h2><button onclick="window.triggerUpload()" class="bg-amber-400 text-white px-5 py-3 rounded-2xl text-[12px] font-black italic">上傳</button></div>
