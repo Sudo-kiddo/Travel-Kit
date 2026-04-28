@@ -584,10 +584,57 @@
             `<div class="p-4 bg-rose-50 rounded-xl text-[11px] font-bold text-rose-600 border-l-4 border-rose-400 uppercase tracking-tighter">系統更新：新增債務明細查看功能。</div>`;
         }
 
-        window.searchAndShowDirections = () => {
-            const q = document.getElementById('map-search').value; if(!q) return;
-            document.getElementById('map-container').innerHTML = `<div class="text-center p-12"><a href="https://www.google.com/maps/search/${encodeURIComponent(q)}" target="_blank" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black italic text-sm">喺 Google Maps 開啟位置</a></div>`;
-        };
+       // --- UPDATED MAP PAGE LOGIC ---
+
+// 1. Search and Display Location directly in the iframe
+window.searchAndShowDirections = () => {
+    const query = document.getElementById('map-search').value;
+    const placeholder = document.getElementById('map-placeholder');
+    const iframe = document.getElementById('google-map-iframe');
+    const foodBtn = document.getElementById('nearby-food-container');
+
+    if (!query) return;
+
+    // This URL format allows embedding Google Maps via iframe
+    // output=embed is the key parameter here
+    const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+
+    // UI Updates
+    if (placeholder) placeholder.classList.add('hidden');
+    iframe.src = embedUrl;
+    iframe.classList.remove('hidden');
+
+    // Show the "Suggested Food Nearby" button
+    if (foodBtn) foodBtn.classList.remove('hidden');
+};
+
+// 2. Search Food Nearby based on the current location in the search bar
+window.searchNearbyFood = () => {
+    const currentQuery = document.getElementById('map-search').value;
+    if (!currentQuery) return;
+
+    // Combine the location with a food keyword
+    const foodSearchQuery = currentQuery + " restaurants";
+    const foodUrl = `https://maps.google.com/maps?q=${encodeURIComponent(foodSearchQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+    
+    const iframe = document.getElementById('google-map-iframe');
+    iframe.src = foodUrl;
+    
+    // Optional: Update search bar text to show what is being viewed
+    document.getElementById('map-search').value = currentQuery + " (附近美食)";
+};
+
+// Add event listener for the "Enter" key on the search input
+document.addEventListener('DOMContentLoaded', () => {
+    const mapInput = document.getElementById('map-search');
+    if (mapInput) {
+        mapInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                window.searchAndShowDirections();
+            }
+        });
+    }
+});
 
         window.triggerUpload = () => document.getElementById('file-input').click();
         window.handleFileSelect = async (e) => {
