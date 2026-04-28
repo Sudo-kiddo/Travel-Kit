@@ -585,28 +585,27 @@
         }
 
        // --- UPDATED MAP PAGE LOGIC ---
+       // 1. Search and Display Location directly in the iframe
+        window.searchAndShowDirections = () => {
+            const query = document.getElementById('map-search').value;
+            const placeholder = document.getElementById('map-placeholder');
+            const iframe = document.getElementById('google-map-iframe');
+            const foodBtn = document.getElementById('nearby-food-container');
 
-// 1. Search and Display Location directly in the iframe
-window.searchAndShowDirections = () => {
-    const query = document.getElementById('map-search').value;
-    const placeholder = document.getElementById('map-placeholder');
-    const iframe = document.getElementById('google-map-iframe');
-    const foodBtn = document.getElementById('nearby-food-container');
+            if (!query) return;
 
-    if (!query) return;
+        // This URL format allows embedding Google Maps via iframe
+        // output=embed is the key parameter here
+            const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
 
-    // This URL format allows embedding Google Maps via iframe
-    // output=embed is the key parameter here
-    const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+        // UI Updates
+        if (placeholder) placeholder.classList.add('hidden');
+        iframe.src = embedUrl;
+        iframe.classList.remove('hidden');
 
-    // UI Updates
-    if (placeholder) placeholder.classList.add('hidden');
-    iframe.src = embedUrl;
-    iframe.classList.remove('hidden');
-
-    // Show the "Suggested Food Nearby" button
-    if (foodBtn) foodBtn.classList.remove('hidden');
-};
+        // Show the "Suggested Food Nearby" button
+        if (foodBtn) foodBtn.classList.remove('hidden');
+        };
 
 // 2. Search Food Nearby based on the current location in the search bar
 window.searchNearbyFood = () => {
