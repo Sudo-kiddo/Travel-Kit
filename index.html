@@ -69,7 +69,7 @@
             justify-content: center;
         }
         .date-chip.active { 
-            background-color: #6366f1; 
+            background-color: #60b5e6; 
             color: white; 
             transform: translateY(-8px); 
             box-shadow: 0 12px 20px -5px rgba(99, 102, 241, 0.5); 
@@ -147,8 +147,8 @@
         <div id="page-itinerary" class="page">
             <div class="calendar-scroll-container no-scrollbar" id="calendar-strip"></div>
             <div class="flex justify-between items-center mb-6 px-1">
-                <h2 class="text-2xl font-black italic text-gray-800" id="current-view-date">Pre-trip 備忘</h2>
-                <button onclick="window.showAddItineraryModal()" class="bg-indigo-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-plus text-lg"></i></button>
+                <h2 class="text-2xl font-black italic text-gray-800" id="current-view-date">Pre-trip 備忘📝</h2>
+                <button onclick="window.showAddItineraryModal()" class="bg-blue-300 text-white w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg"><i class="fa-solid fa-plus text-lg"></i></button>
             </div>
             <div class="itinerary-container" id="itin-wrapper">
                 <div class="itinerary-line" id="timeline-line"></div>
@@ -157,15 +157,7 @@
         </div>
 
         <div id="page-expenses" class="page">
-            <div class="flex justify-between items-center mb-5 px-1">
-                <div class="flex gap-2">
-                    <button onclick="window.showAddExpenseModal()" class="bg-emerald-50 text-emerald-500 px-5 py-3 rounded-2xl text-[12px] font-black italic border border-emerald-100">➕ 記帳</button>
-                    <button onclick="window.showPaybackModal()" class="bg-indigo-50 text-indigo-500 px-5 py-3 rounded-2xl text-[12px] font-black italic border border-indigo-100">💸 轉帳</button>
-                </div>
-                <button onclick="window.resetExpenseData()" class="bg-rose-50 text-rose-500 px-4 py-3 rounded-2xl text-[12px] font-black italic border border-rose-100">🗑️ 清空</button>
-            </div>
-            
-            <div class="bg-gradient-to-br from-rose-300 to-pink-400 text-white rounded-[2.2rem] p-7 mb-6 shadow-xl italic">
+            <div class="bg-gradient-to-br from-rose-300 to-pink-400 text-white rounded-[2.2rem] p-6 mb-5 shadow-xl italic">
                 <div class="flex justify-between items-end">
                     <div>
                         <span class="text-white/70 text-[11px] font-black tracking-widest uppercase">總計 THB</span>
@@ -181,51 +173,49 @@
                     </div>
                 </div>
             </div>
+            <div class="flex justify-between items-center mb-5 px-1">
+                <div class="flex gap-2">
+                    <button onclick="window.showAddExpenseModal()" class="bg-emerald-50 text-emerald-500 px-5 py-3 rounded-2xl text-[12px] font-black italic border border-emerald-200">➕ 記帳</button>
+                    <button onclick="window.showPaybackModal()" class="bg-indigo-50 text-indigo-500 px-5 py-3 rounded-2xl text-[12px] font-black italic border border-indigo-200">💸 轉帳</button>
+                </div>
+                <button onclick="window.resetExpenseData()" class="bg-rose-50 text-rose-500 px-4 py-3 rounded-2xl text-[12px] font-black italic border border-rose-200">🗑️ 清空</button>
+            </div>
 
+            <div class="mb-2 px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic flex justify-between">
+                <span>成員結餘</span>
+                <span>點擊查看結算</span>
+            </div>
+            <div id="settlement-list" class="bg-white rounded-[2rem] p-6 card space-y-4 border-t-4 border-t-indigo-400 mb-6"></div>
             <div id="expense-list" class="space-y-4 mb-8"></div>
-            <div class="mb-2 px-2 text-[10px] font-black text-slate-400 uppercase tracking-widest italic">點擊名稱查看詳情</div>
-            <div id="settlement-list" class="bg-white rounded-[2rem] p-6 card space-y-4 border-t-4 border-t-indigo-400"></div>
         </div>
 
         <div id="page-map" class="page">
-    <div class="relative mb-4">
-        <input id="map-search" type="text" placeholder="想去邊度？ (例如: 曼谷大皇宮)" class="w-full px-6 py-4 pr-16 rounded-2xl border-none shadow-md font-bold outline-none focus:ring-2 ring-indigo-400 text-base">
-        <button onclick="window.searchAndShowDirections()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-indigo-500 text-white w-12 h-12 rounded-xl active:scale-95 transition-transform flex items-center justify-center">
-            <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
-    </div>
-
-    <div id="map-container" class="h-[45vh] bg-white rounded-[2.5rem] card overflow-hidden flex items-center justify-center text-slate-300 italic text-sm p-4 mb-6 relative">
-        <p id="map-placeholder">請輸入目的地搜尋地圖</p>
-        <iframe id="google-map-iframe" class="hidden w-full h-full border-0" allowfullscreen></iframe>
-    </div>
-
-    <div id="nearby-food-container" class="hidden mb-6 animate-fadeIn">
-        <button onclick="window.searchNearbyFood()" class="w-full bg-emerald-500 text-white p-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg active:scale-95 transition-transform">
-            <i class="fa-solid fa-utensils"></i>
-            <span class="font-black italic uppercase tracking-wider text-sm">搜尋附近必食餐廳</span>
-        </button>
-    </div>
-
-    <div class="mb-2 px-1 flex justify-between items-end">
-        <h3 class="text-lg font-black italic text-gray-800 uppercase">我的儲存清單</h3>
-    </div>
-    <a href="https://maps.app.goo.gl/Hfm2i6feL9SmdaqU9" target="_blank" class="w-full bg-slate-900 text-white p-6 rounded-[2rem] flex items-center justify-between shadow-xl active:scale-[0.98] transition-all group">
-        <div class="flex items-center gap-4">
-            <div class="bg-amber-400 w-12 h-12 rounded-2xl flex items-center justify-center text-slate-900 text-xl shadow-inner">
-                <i class="fa-solid fa-star"></i>
+            <div class="relative mb-4">
+                <input id="map-search" type="text" placeholder="想去邊度？" class="w-full px-6 py-4 pr-16 rounded-2xl border-none shadow-md font-bold outline-none focus:ring-2 ring-indigo-400 text-base">
+                <button onclick="window.searchAndShowDirections()" class="absolute right-2 top-1/2 -translate-y-1/2 bg-amber-400 text-white w-12 h-12 rounded-xl flex items-center justify-center">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
             </div>
-            <div>
-                <div class="text-sm font-black italic uppercase tracking-wider">美食地圖全集</div>
-                <div class="text-[10px] font-bold text-slate-400 opacity-80 uppercase tracking-tighter">Google Maps Saved List</div>
+            <div id="map-container" class="h-[45vh] bg-white rounded-[2.5rem] card overflow-hidden flex items-center justify-center text-slate-300 italic text-sm p-4 mb-6 relative">
+                <p id="map-placeholder">請輸入目的地搜尋地圖</p>
+                <iframe id="google-map-iframe" class="hidden w-full h-full border-0" allowfullscreen></iframe>
             </div>
+            <a href="https://maps.app.goo.gl/Hfm2i6feL9SmdaqU9" target="_blank" class="w-full bg-slate-800 text-white p-6 rounded-[2rem] flex items-center justify-between shadow-xl group">
+                <div class="flex items-center gap-4">
+                    <div class="bg-amber-400 w-12 h-12 rounded-2xl flex items-center justify-center text-slate-900 text-xl shadow-inner">
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-black italic uppercase tracking-wider">美食地圖全集</div>
+                        <div class="text-[10px] font-bold text-slate-400 opacity-80 uppercase tracking-tighter">Google Maps Saved List</div>
+                    </div>
+                </div>
+                <i class="fa-solid fa-chevron-right text-slate-500 group-hover:translate-x-1 transition-transform"></i>
+            </a>
         </div>
-        <i class="fa-solid fa-chevron-right text-slate-500 group-hover:translate-x-1 transition-transform"></i>
-    </a>
-</div>
         
         <div id="page-documents" class="page">
-            <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-black italic">共享文件</h2><button onclick="window.triggerUpload()" class="bg-amber-400 text-white px-5 py-3 rounded-2xl text-[12px] font-black italic">上傳</button></div>
+            <div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-black italic">共享文件📚</h2><button onclick="window.triggerUpload()" class="bg-amber-100 text-amber-500 px-5 py-3 rounded-2xl text-[12px] font-black italic border border-amber-200">👆🏼上傳</button></div>
             <div id="documents-list" class="space-y-4"></div>
             <input type="file" id="file-input" class="hidden" onchange="window.handleFileSelect(event)">
         </div>
@@ -315,7 +305,6 @@
 
         const SUPABASE_URL = 'https://tyvvmxmdeaugjaxhqkol.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5dnZteG1kZWF1Z2pheGhxa29sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4NjI4NTMsImV4cCI6MjA5MjQzODg1M30.WOibTjOXIgd-Zpbc9fXuUo_IAUuFvy2cdFn7ohrTAIQ';
-        
         const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         client.channel('realtime_sync')
@@ -335,7 +324,6 @@
         }
 
         function showNotification() { document.getElementById('update-dot').classList.remove('hidden'); }
-
         window.onload = () => { initDateBar(); initTimeSelectors(); fetchData(); window.navigateTo('home'); };
 
         window.spawnEmoji = (e) => {
@@ -373,14 +361,13 @@
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             const idx = ['home','itinerary','expenses','map','documents'].indexOf(page);
             if(idx >= 0) document.querySelectorAll('.nav-item')[idx].classList.add('active');
-            window.scrollTo(0,0);
         };
 
         window.filterDate = (d) => {
             selectedDate = d;
             document.querySelectorAll('.date-chip').forEach(el => el.classList.remove('active'));
             const target = document.getElementById(`date-${d}`); if(target) target.classList.add('active');
-            document.getElementById('current-view-date').textContent = d === 'Pre' ? 'Pre-trip 備忘' : (d === '01' ? `7月1日 行程` : `6月${d}日 行程`);
+            document.getElementById('current-view-date').textContent = d === 'Pre' ? 'Pre-trip 備忘' : (d === '01' ? `7月1日 行程📍` : `6月${d}日 行程📍`);
             renderItinerary();
         };
 
@@ -391,7 +378,6 @@
             let f = demoItinerary.filter(i => i.date === selectedDate);
             if(isPre) { f.sort((a,b) => (a.checked === b.checked) ? 0 : a.checked ? 1 : -1); wrapper.classList.add('is-pre-trip'); } 
             else { f.sort((a,b) => (a.time || "").localeCompare(b.time || "")); wrapper.classList.remove('is-pre-trip'); }
-            if(f.length === 0) { container.innerHTML = `<div class="text-center py-24 text-slate-300 font-black italic text-lg">暫時無紀錄</div>`; return; }
             container.innerHTML = f.map((item, idx) => `
                 <div onclick="window.editItinerary(${item.id})" class="itin-card card">
                     <div class="flex justify-between items-start">
@@ -435,8 +421,7 @@
 
         window.saveItinerary = async () => {
             const title = document.getElementById('act-title').value; if(!title) return;
-            const isPre = document.getElementById('act-date').value === 'Pre';
-            const timeStr = isPre ? '' : `${document.getElementById('act-hour').value}:${document.getElementById('act-min').value}`;
+            const timeStr = document.getElementById('act-date').value === 'Pre' ? '' : `${document.getElementById('act-hour').value}:${document.getElementById('act-min').value}`;
             const data = { id: editingId || Date.now(), date: document.getElementById('act-date').value, time: timeStr, title, remark: document.getElementById('act-remark').value, checked: editingId ? (demoItinerary.find(i => i.id === editingId).checked || false) : false };
             await client.from('itinerary').upsert(data); window.hideModals(); fetchData();
         };
@@ -460,10 +445,9 @@
             const description = document.getElementById('exp-desc').value;
             const currency = document.getElementById('exp-currency').value;
             const payer = document.getElementById('exp-paidby').value;
-            if(amount <= 0 || !split.length || !description) { alert("請填寫所有欄位！"); return; }
-            const { error } = await client.from('expenses').insert({ description, amount, currency, payer, participants: split });
-            if (error) { console.error("Save error:", error); alert("Fail to save: " + error.message); } 
-            else { window.hideModals(); await fetchData(); }
+            if(amount <= 0 || !split.length || !description) return;
+            await client.from('expenses').insert({ description, amount, currency, payer, participants: split });
+            window.hideModals(); fetchData();
         };
 
         window.showPaybackModal = () => {
@@ -479,20 +463,17 @@
             const amount = parseFloat(document.getElementById('payback-amount').value) || 0;
             const currency = document.getElementById('payback-currency').value;
             if(amount <= 0) return;
-            const { error } = await client.from('expenses').insert({ description: `💸 轉帳: ${from} ➔ ${to}`, amount, currency, payer: from, participants: [to] });
-            if (error) { alert("Fail to save: " + error.message); } else { window.hideModals(); await fetchData(); }
+            await client.from('expenses').insert({ description: `💸 轉帳: ${from} ➔ ${to}`, amount, currency, payer: from, participants: [to] });
+            window.hideModals(); fetchData();
         };
 
-        window.resetExpenseData = async () => {
-            if(confirm("⚠️ 確定要「清空所有開支紀錄」嗎？\n此操作無法撤銷。")) {
-                await client.from('expenses').delete().neq('id', 0);
-                fetchData();
-            }
-        };
+        window.resetExpenseData = async () => { if(confirm("確定清空？")) { await client.from('expenses').delete().neq('id', 0); fetchData(); } };
 
         function renderExpenses() {
             const container = document.getElementById('expense-list');
-            const bal = {}; groupMembers.forEach(m => bal[m] = {THB: 0, HKD: 0});
+            const netBalances = {}; 
+            groupMembers.forEach(m => netBalances[m] = { THB: 0, HKD: 0 });
+
             let thbTotal = 0, hkdTotal = 0;
             
             if (!demoExpenses || demoExpenses.length === 0) {
@@ -501,139 +482,109 @@
                 document.getElementById('total-spent-hkd').textContent = "0";
             } else {
                 container.innerHTML = demoExpenses.map(item => {
-                    const desc = item.description || item.desc || "無名稱";
-                    const payerName = item.payer || item.paid_by || "未知";
-                    const participantsList = item.participants || item.split || [];
+                    const desc = item.description || "無名稱";
+                    const payerName = item.payer || "未知";
+                    const participantsList = item.participants || [];
                     const isTransfer = desc.includes('轉帳:');
-                    if(!isTransfer) { if(item.currency === 'THB') thbTotal += item.amount; else hkdTotal += item.amount; }
+                    
+                    if(!isTransfer) { 
+                        if(item.currency === 'THB') thbTotal += item.amount; 
+                        else hkdTotal += item.amount; 
+                    }
+
                     const share = item.amount / (participantsList.length || 1);
-                    if (bal[payerName]) bal[payerName][item.currency] += item.amount;
-                    participantsList.forEach(m => { if(bal[m]) bal[m][item.currency] -= share; });
+                    if (netBalances[payerName]) netBalances[payerName][item.currency] += item.amount;
+                    participantsList.forEach(m => { if(netBalances[m]) netBalances[m][item.currency] -= share; });
+
                     const symbol = item.currency === 'THB' ? '฿' : '$';
                     return `
                     <div class="bg-white p-5 rounded-[1.8rem] card flex justify-between items-center ${isTransfer ? 'border-l-4 border-l-indigo-400' : ''}">
-                        <div><div class="font-black text-slate-800 text-base">${desc}</div>${!isTransfer ? `<div class="text-[10px] font-black text-indigo-400 italic uppercase tracking-wider">${payerName} 支付</div>` : ''}</div>
-                        <div class="text-right"><div class="text-lg font-black italic">${symbol}${item.amount.toLocaleString()}</div></div>
+                        <div>
+                            <div class="font-black text-slate-800 text-base">${desc}</div>
+                            <div class="text-[10px] font-black text-indigo-400 italic uppercase tracking-wider">${payerName} 支付</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-black italic">${symbol}${item.amount.toLocaleString()}</div>
+                        </div>
                     </div>`;
                 }).join('');
+
                 document.getElementById('total-spent-thb').textContent = Math.round(thbTotal).toLocaleString();
                 document.getElementById('total-spent-hkd').textContent = Math.round(hkdTotal).toLocaleString();
             }
             
             document.getElementById('settlement-list').innerHTML = groupMembers.map(m => {
-                const t = bal[m].THB; const h = bal[m].HKD;
+                const t = netBalances[m].THB; const h = netBalances[m].HKD;
+                const tClass = t >= 0 ? 'text-emerald-700' : 'text-rose-500';
+                const hClass = h >= 0 ? 'text-emerald-700' : 'text-rose-500';
                 return `
                 <div onclick="window.showMemberDetail('${m}')" class="flex justify-between items-center border-b border-slate-50 pb-4 last:border-0 cursor-pointer active:bg-slate-50 transition-colors">
                     <span class="font-black text-gray-700 text-sm italic uppercase underline decoration-indigo-200 underline-offset-4">${m}</span>
                     <div class="text-right">
-                        <div class="font-black text-[12px] ${t>=0?'text-blue-700':'text-rose-500'}">${t.toFixed(0)} <span class="opacity-60 text-blue-900">THB</span></div>
-                        <div class="font-black text-[11px] ${h>=0?'text-purple-700':'text-rose-600'}">${h.toFixed(0)} <span class="opacity-60 text-purple-900">HKD</span></div>
+                        <div class="font-black text-[12px] ${tClass}">${t > 0 ? '+' : ''}${Math.round(t)} <span class="opacity-60">THB</span></div>
+                        <div class="font-black text-[12px] ${hClass}">${h > 0 ? '+' : ''}${Math.round(h)} <span class="opacity-60">HKD</span></div>
                     </div>
                 </div>`;
             }).join('');
         }
 
         window.showMemberDetail = (name) => {
-            const matrix = {}; 
-            groupMembers.forEach(m1 => { 
-                matrix[m1] = {}; 
-                groupMembers.forEach(m2 => matrix[m1][m2] = { THB: 0, HKD: 0 });
-            });
+            const netTotals = { THB: {}, HKD: {} };
+            groupMembers.forEach(m => { netTotals.THB[m] = 0; netTotals.HKD[m] = 0; });
 
             demoExpenses.forEach(exp => {
-                const payer = exp.payer;
-                const participants = exp.participants || [];
-                const share = exp.amount / (participants.length || 1);
+                const share = exp.amount / (exp.participants?.length || 1);
                 const cur = exp.currency;
-                participants.forEach(p => {
-                    if(p !== payer) {
-                        matrix[p][payer][cur] += share;
-                    }
+                if(netTotals[cur][exp.payer] !== undefined) netTotals[cur][exp.payer] += exp.amount;
+                exp.participants.forEach(p => { if(netTotals[cur][p] !== undefined) netTotals[cur][p] -= share; });
+            });
+
+            function getSimplifiedSettlements(currency) {
+                let debtors = []; let creditors = [];
+                groupMembers.forEach(m => {
+                    let bal = Math.round(netTotals[currency][m]);
+                    if (bal < -1) debtors.push({ name: m, amount: Math.abs(bal) });
+                    else if (bal > 1) creditors.push({ name: m, amount: bal });
                 });
-            });
+                let results = []; let d = 0, c = 0;
+                while (d < debtors.length && c < creditors.length) {
+                    let settleAmt = Math.min(debtors[d].amount, creditors[c].amount);
+                    results.push({ from: debtors[d].name, to: creditors[c].name, amount: settleAmt, cur: currency });
+                    debtors[d].amount -= settleAmt; creditors[c].amount -= settleAmt;
+                    if (debtors[d].amount === 0) d++; if (creditors[c].amount === 0) c++;
+                }
+                return results;
+            }
 
+            const allSettlements = [...getSimplifiedSettlements('THB'), ...getSimplifiedSettlements('HKD')];
             let owes = []; let owed = [];
-            groupMembers.forEach(other => {
-                if(other === name) return;
-                // What 'name' owes to 'other'
-                const tOwe = matrix[name][other].THB - matrix[other][name].THB;
-                const hOwe = matrix[name][other].HKD - matrix[other][name].HKD;
-                if(tOwe > 1) owes.push(`${other}: ฿${Math.round(tOwe)}`);
-                if(hOwe > 1) owes.push(`${other}: $${Math.round(hOwe)}`);
-                if(tOwe < -1) owed.push(`${other}: ฿${Math.round(Math.abs(tOwe))}`);
-                if(hOwe < -1) owed.push(`${other}: $${Math.round(Math.abs(hOwe))}`);
+            allSettlements.forEach(s => {
+                const sym = s.cur === 'THB' ? '฿' : '$';
+                if (s.from === name) owes.push(`${s.to}: ${sym}${Math.round(s.amount)}`);
+                if (s.to === name) owed.push(`${s.from}: ${sym}${Math.round(s.amount)}`);
             });
 
-            let msg = `👤 ${name.toUpperCase()} 清單\n\n`;
-            msg += `🔴 應付 (Owes to others):\n${owes.length ? owes.join('\n') : '無債一身輕'}\n\n`;
-            msg += `🟢 應收 (Others owe ${name}):\n${owed.length ? owed.join('\n') : '暫無收款'}`;
+            let msg = `👤 ${name.toUpperCase()}的結算\n`;
+            msg += `(已自動抵銷)\n\n`;
+            msg += `🔴 應付:\n${owes.length ? owes.join('\n') : '✅ 已清數 / 無須付款'}\n\n`;
+            msg += `🟢 應收:\n${owed.length ? owed.join('\n') : '暫無收款'}`;
             alert(msg);
         };
 
         function updateBellLog() {
             const container = document.getElementById('update-log-container');
-            let logs = [];
-            if (demoExpenses) demoExpenses.slice(0, 5).forEach(e => {
-                const d = e.description || e.desc || "開支";
-                const p = e.payer || e.paid_by || "有人";
-                logs.push({ text: `${d} (由 ${p} 記錄)`, time: new Date(e.created_at || Date.now()).getTime() });
-            });
-            if (demoItinerary) demoItinerary.slice(0, 5).forEach(i => logs.push({ text: `行程更新: ${i.title}`, time: i.id }));
-            logs.sort((a,b) => b.time - a.time);
-            container.innerHTML = logs.slice(0, 5).map(l => `<div class="p-4 bg-slate-50 rounded-xl text-[11px] font-bold italic border-l-4 border-indigo-500 uppercase">${l.text}</div>`).join('') + 
-            `<div class="p-4 bg-rose-50 rounded-xl text-[11px] font-bold text-rose-600 border-l-4 border-rose-400 uppercase tracking-tighter">系統更新：新增債務明細查看功能。</div>`;
+            let logs = demoExpenses.slice(0, 5).map(e => ({ text: `${e.description} (by ${e.payer})` }));
+            container.innerHTML = logs.map(l => `<div class="p-4 bg-slate-50 rounded-xl text-[11px] font-bold italic border-l-4 border-indigo-500 uppercase">${l.text}</div>`).join('');
         }
 
-       // --- UPDATED MAP PAGE LOGIC ---
-       // 1. Search and Display Location directly in the iframe
         window.searchAndShowDirections = () => {
             const query = document.getElementById('map-search').value;
-            const placeholder = document.getElementById('map-placeholder');
-            const iframe = document.getElementById('google-map-iframe');
-            const foodBtn = document.getElementById('nearby-food-container');
-
             if (!query) return;
-
-        // This URL format allows embedding Google Maps via iframe
-        // output=embed is the key parameter here
-            const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-
-        // UI Updates
-        if (placeholder) placeholder.classList.add('hidden');
-        iframe.src = embedUrl;
-        iframe.classList.remove('hidden');
-
-        // Show the "Suggested Food Nearby" button
-        if (foodBtn) foodBtn.classList.remove('hidden');
+            document.getElementById('map-placeholder').classList.add('hidden');
+            const iframe = document.getElementById('google-map-iframe');
+            iframe.src = `https://www.google.com/maps?q=${encodeURIComponent(query)}&output=embed`;
+            iframe.classList.remove('hidden');
         };
-
-// 2. Search Food Nearby based on the current location in the search bar
-window.searchNearbyFood = () => {
-    const currentQuery = document.getElementById('map-search').value;
-    if (!currentQuery) return;
-
-    // Combine the location with a food keyword
-    const foodSearchQuery = currentQuery + " restaurants";
-    const foodUrl = `https://maps.google.com/maps?q=${encodeURIComponent(foodSearchQuery)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
-    
-    const iframe = document.getElementById('google-map-iframe');
-    iframe.src = foodUrl;
-    
-    // Optional: Update search bar text to show what is being viewed
-    document.getElementById('map-search').value = currentQuery + " (附近美食)";
-};
-
-// Add event listener for the "Enter" key on the search input
-document.addEventListener('DOMContentLoaded', () => {
-    const mapInput = document.getElementById('map-search');
-    if (mapInput) {
-        mapInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                window.searchAndShowDirections();
-            }
-        });
-    }
-});
 
         window.triggerUpload = () => document.getElementById('file-input').click();
         window.handleFileSelect = async (e) => {
@@ -650,7 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div><div class="text-sm font-black text-gray-800">${doc.name}</div><div class="text-[10px] font-bold text-slate-400 italic">${doc.date}</div></div>
                 </div>`).join('');
         }
-
+        
         window.factoryReset = async () => {
             if(confirm("⚠️ 警告：這將會清除所有雲端數據，確定？")) {
                 await client.from('itinerary').delete().neq('id', 0);
