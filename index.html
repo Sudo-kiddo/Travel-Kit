@@ -497,8 +497,9 @@
                     participantsList.forEach(m => { if(netBalances[m]) netBalances[m][item.currency] -= share; });
 
                     const symbol = item.currency === 'THB' ? '฿' : '$';
+                    // UPDATED: Added onclick and cursor styling for clicking details
                     return `
-                    <div class="bg-white p-5 rounded-[1.8rem] card flex justify-between items-center ${isTransfer ? 'border-l-4 border-l-indigo-400' : ''}">
+                    <div onclick="window.showExpenseDetail(${item.id})" class="bg-white p-5 rounded-[1.8rem] card flex justify-between items-center cursor-pointer active:bg-slate-50 transition-colors ${isTransfer ? 'border-l-4 border-l-indigo-400' : ''}">
                         <div>
                             <div class="font-black text-slate-800 text-base">${desc}</div>
                             <div class="text-[10px] font-black text-indigo-400 italic uppercase tracking-wider">${payerName} 支付</div>
@@ -527,6 +528,22 @@
                 </div>`;
             }).join('');
         }
+
+        // NEW: Function to show details when an individual expense is clicked
+        window.showExpenseDetail = (id) => {
+            const item = demoExpenses.find(e => e.id === id);
+            if (!item) return;
+
+            const symbol = item.currency === 'THB' ? '฿' : '$';
+            const participants = (item.participants || []).join(', ');
+            
+            let msg = `🧾 項目: ${item.description}\n`;
+            msg += `💰 總額: ${symbol}${item.amount.toLocaleString()}\n`;
+            msg += `👤 付款人: ${item.payer}\n`;
+            msg += `👥 分擔成員: ${participants}\n`;
+            
+            alert(msg);
+        };
 
         window.showMemberDetail = (name) => {
             const netTotals = { THB: {}, HKD: {} };
